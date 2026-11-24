@@ -1,5 +1,6 @@
 import { audio, pentaFreq } from './engine/AudioEngine'
 import { track } from './analytics'
+import { stats } from './share'
 import { t as tr } from './i18n'
 import { Flash, HitStop, Particles, Shake, clamp, easeOutBack, haptic, rand, runLoop, setupCanvas } from './engine/juice'
 
@@ -183,6 +184,7 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
     banner = { text: 'CLEAR!', sub: t < 5 ? tr('void_fast', { t: t.toFixed(2) }) : `${t.toFixed(2)}s`, t: 1 }
     clearAt = time + 0.8
     track('wave_clear', { wave, seconds: Math.round(t * 10) / 10 })
+    stats.n = Math.min(stats.n ?? Infinity, Number(t.toFixed(2)))
   }
 
   const update = (dt: number) => {

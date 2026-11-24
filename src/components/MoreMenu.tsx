@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { openAbout, t, type ToyId } from '../i18n'
+import { ShareButton } from './ShareButton'
 
 const SITES: { id: ToyId; icon: string }[] = [
   { id: 'charge', icon: '💥' },
@@ -40,12 +41,15 @@ export function MoreMenu({ current }: { current: ToyId }) {
           </a>
         </div>
       )}
+      <div className="flex gap-2">
+      <ShareButton toy={current} />
       <button
         onClick={() => setOpen((o) => !o)}
         className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-sm font-medium text-white/80 backdrop-blur-md hover:bg-white/20 active:scale-95"
       >
         {open ? '✕' : 'More ⚡'}
       </button>
+      </div>
     </div>
   )
 }
