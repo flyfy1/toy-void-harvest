@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { t, type ToyId } from '../i18n'
+import { openAbout, t, type ToyId } from '../i18n'
 
 const SITES: { id: ToyId; icon: string }[] = [
   { id: 'charge', icon: '💥' },
@@ -24,6 +24,17 @@ export function MoreMenu({ current }: { current: ToyId }) {
               <span>{t(`name_${s.id}`)}</span>
             </a>
           ))}
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false)
+              openAbout()
+            }}
+            className="flex items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-white/80 hover:bg-white/10 active:bg-white/20"
+          >
+            <span className="text-lg">ⓘ</span>
+            <span>{t('about')}</span>
+          </button>
           <a href="https://games.integ.life" className="rounded-xl px-3 py-1.5 text-xs text-white/50 hover:bg-white/10">
             {t('more_games')}
           </a>

@@ -1,0 +1,45 @@
+# Void Harvest
+
+> Hundreds of jittery shapes, and your cursor is a black hole. Spiral them in as the notes climb, and clear the screen in five seconds. A tiny stress-relief toy, no sign-up.
+
+Void Harvest (黑洞收割 (zh-CN), Agujero Negro (es), Trou Noir (fr), ブラックホール (ja)) is a free browser toy at https://void.integ.life/ by Integ Life. It opens straight into play: no sign-up, no download, no ads, no tutorial. It works with a mouse or a touchscreen on phones, tablets and computers.
+
+## How to play
+
+1. Move your mouse, or drag your finger on a phone. The cursor becomes a black hole.
+2. Every shape that comes close spirals in and is swallowed. Each one plays a note on a rising pentatonic scale, so the faster you sweep the higher the melody climbs, and the hole grows as it eats.
+3. Clear every shape for a CLEAR! burst and chord. Under five seconds counts as a speed clear. The next wave arrives 0.8 seconds later in a new pattern (grid, sunflower, rings, rainbow or diamond).
+4. On a computer, click once to turn the sound on; browsers only allow audio after a click or tap.
+
+## Facts
+
+- URL: https://void.integ.life/
+- Price: free
+- Platforms: any modern web browser (desktop and mobile)
+- Languages: English, 简体中文 (Simplified Chinese), Español, Français and 日本語 (Japanese), picked from the browser language (default English)
+- Sound: synthesised live with the Web Audio API; vibration on Android
+- Made by: Integ Life (https://integ.life/), first published 2026-11-24
+
+## FAQ
+
+**Is Void Harvest free?**
+Yes. It is free, with no sign-up, no download and no ads. It runs in any modern browser on phones, tablets and computers.
+
+**Does it have sound and vibration?**
+Yes. Every sound is synthesised live in the browser with the Web Audio API, so there are no audio files to load. On Android phones it also vibrates at the big moments; iPhone browsers do not support web vibration.
+
+**Which languages does it support?**
+English, 简体中文 (Simplified Chinese), Español, Français and 日本語 (Japanese). The language is picked automatically from your browser settings; any other language falls back to English.
+
+**Who made it?**
+Integ Life (integ.life). Void Harvest is one of four small stress-relief toys, together with Charge Burst, Glass Smash, Chain Pop. More games are at games.integ.life.
+
+**Is any personal data collected?**
+No account and no personal data. At most, anonymous usage statistics (page views and play counts) are collected.
+
+## Related
+
+- [Charge Burst](https://charge.integ.life/): Hold to charge a glowing energy core, release to detonate it.
+- [Glass Smash](https://smash.integ.life/): Smash a pane of glass with the word you hate written on it.
+- [Chain Pop](https://pop.integ.life/): Pop neon bubbles, then set off a full-screen chain reaction.
+- [Integ Games](https://games.integ.life/): more browser games

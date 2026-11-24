@@ -31,6 +31,7 @@ const en = {
   smash_words: ['BUG', 'MONDAY', 'OVERTIME', 'DEADLINE', 'MEETINGS', 'KPI', 'TAXES', 'SPAM'],
   pop_armed: 'OVERDRIVE · tap anywhere to detonate',
   more_games: 'More games · games.integ.life →',
+  about: 'How to play',
 }
 export type Messages = typeof en
 
@@ -53,6 +54,7 @@ const zhCN: Messages = {
   smash_words: ['BUG', '加班', '周一', 'KPI', '暴跌', 'DEADLINE', '改需求', '内卷'],
   pop_armed: 'OVERDRIVE · 点任意处引爆',
   more_games: '更多游戏 · games.integ.life →',
+  about: '玩法说明',
 }
 
 const es: Messages = {
@@ -74,6 +76,7 @@ const es: Messages = {
   smash_words: ['LUNES', 'BUG', 'HORAS EXTRA', 'REUNIÓN', 'DEADLINE', 'IMPUESTOS', 'ATASCO', 'SPAM'],
   pop_armed: 'OVERDRIVE · toca donde quieras para detonar',
   more_games: 'Más juegos · games.integ.life →',
+  about: 'Cómo jugar',
 }
 
 const fr: Messages = {
@@ -95,6 +98,7 @@ const fr: Messages = {
   smash_words: ['LUNDI', 'BUG', 'RÉUNION', 'HEURES SUP', 'DEADLINE', 'IMPÔTS', 'BOUCHONS', 'SPAM'],
   pop_armed: 'OVERDRIVE · touche n’importe où pour exploser',
   more_games: 'Plus de jeux · games.integ.life →',
+  about: 'Comment jouer',
 }
 
 
@@ -120,6 +124,7 @@ const ja: Messages = {
   smash_words: ['残業', '月曜日', 'バグ', '締め切り', '会議', 'ノルマ', '満員電車', '上司'],
   pop_armed: 'OVERDRIVE · どこでもタップで起爆',
   more_games: 'その他のゲーム · games.integ.life →',
+  about: '遊び方',
 }
 
 
@@ -158,4 +163,20 @@ export function applyMeta(toy: ToyId) {
   const name = M[`name_${toy}`]
   document.title = locale === 'en' ? `${name} · integ.life` : `${name} · ${en[`name_${toy}`]}`
   document.querySelector('meta[name="description"]')?.setAttribute('content', M[`desc_${toy}`])
+  const local = document.getElementById('about-local')
+  if (local && locale !== 'en') {
+    local.replaceChildren()
+    const h = document.createElement('h2')
+    h.textContent = name
+    const p = document.createElement('p')
+    p.textContent = M[`desc_${toy}`]
+    const tip = document.createElement('p')
+    tip.textContent = M[`hint_${toy}`]
+    local.append(h, p, tip)
+  }
+}
+
+/** The static About / FAQ article in index.html (crawlable text, shown on demand). */
+export function openAbout(open = true) {
+  document.body.classList.toggle('about-open', open)
 }
