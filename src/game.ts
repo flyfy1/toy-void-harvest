@@ -140,10 +140,6 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
         hole.y = e.clientY
       }
       hole.active = true
-      if (!started) {
-        started = true
-        onFirst()
-      }
     }
   }
   const onUp = (e: PointerEvent) => {
@@ -195,7 +191,7 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
       clearAt = -1
       spawnWave()
     }
-    if (clearAt < 0 && started && eatenWave > 0) waveTime += dt
+    if (clearAt < 0 && eatenWave > 0) waveTime += dt
 
     // hole follows pointer with a little lag
     const k = 1 - Math.pow(0.000001, dt)

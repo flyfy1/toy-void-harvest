@@ -74,8 +74,10 @@ class AudioEngine {
     return !!this.ctx && !!this.master
   }
 
-  /** Simple voice budget so a 300-bubble chain doesn't melt the mixer. */
-  private budget(max = 14, windowS = 0.06): boolean {
+  /** Voice budget for the high-rate sounds only (pop/chime/blip), so a 300-bubble
+   *  chain doesn't melt the mixer. Big one-shots (boom/chord/shatter) never go through it. */
+  private budget(max = 8, windowS = 0.05): boolean {
+    if (!this.ok) return false
     const now = this.ctx!.currentTime
     this.recent = this.recent.filter((t) => now - t < windowS)
     if (this.recent.length >= max) return false
@@ -84,7 +86,7 @@ class AudioEngine {
   }
 
   tone(o: ToneOpts): void {
-    if (!this.ok || !this.budget()) return
+    if (!this.ok) return
     const ctx = this.ctx!
     const t0 = ctx.currentTime + (o.delay ?? 0)
     const dur = o.dur ?? 0.2
@@ -109,7 +111,7 @@ class AudioEngine {
   }
 
   noise(o: NoiseOpts): void {
-    if (!this.ok || !this.budget()) return
+    if (!this.ok) return
     const ctx = this.ctx!
     const t0 = ctx.currentTime + (o.delay ?? 0)
     const dur = o.dur ?? 0.3
@@ -147,6 +149,7 @@ class AudioEngine {
 
   /** Small punchy pop with a pitched body. */
   blip(freq: number, gain = 0.25): void {
+    if (!this.budget()) return
     this.tone({ freq: freq * 1.5, freqEnd: freq, type: 'triangle', dur: 0.18, gain })
     this.noise({ dur: 0.05, gain: gain * 0.6, filter: 'bandpass', freq: 2500, q: 1.5 })
     this.tone({ freq: 160, freqEnd: 60, dur: 0.12, gain: gain * 0.9 })
@@ -154,6 +157,7 @@ class AudioEngine {
 
   /** Crisp bell-ish note for pitch escalation. */
   chime(freq: number, gain = 0.18, pan = 0): void {
+    if (!this.budget()) return
     this.tone({ freq, type: 'sine', dur: 0.35, gain, pan })
     this.tone({ freq: freq * 2, type: 'triangle', dur: 0.12, gain: gain * 0.35, pan })
   }
@@ -167,6 +171,7 @@ class AudioEngine {
 
   /** Bubble pop: fast upward sine chirp + click. */
   pop(freq: number, gain = 0.3): void {
+    if (!this.budget()) return
     this.tone({ freq: freq * 0.6, freqEnd: freq * 1.9, type: 'sine', dur: 0.07, gain, attack: 0.002 })
     this.noise({ dur: 0.025, gain: gain * 0.5, filter: 'highpass', freq: 4000 })
   }

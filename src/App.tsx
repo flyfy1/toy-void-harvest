@@ -10,7 +10,7 @@ export default function App() {
   return (
     <>
       <canvas ref={ref} />
-      <Hint text="移动黑洞 · 吸光一切" hidden={touched} />
+      <Hint text="移动黑洞吸光一切 · 点一下开声音" hidden={touched} />
       <MoreMenu current="void" />
     </>
   )
