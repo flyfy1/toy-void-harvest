@@ -1,10 +1,11 @@
 // Google Analytics 4 for the toys (shared file, copied into each repo).
-// One GA4 property "Integ Toys" covers all four sites; reports split by page title / hostname.
+// Reuses the "Integ Games" GA4 property (games.integ.life, same integ.life account); the toys are
+// told apart by page title ("Toy · …") and hostname.
 // Follows the integ.life convention: production host only, consent queued first,
 // no auto page_view, no ads signals, fixed titles and paths, no referrer.
 import type { ToyId } from './i18n'
 
-export const MEASUREMENT_ID = '' // G-XXXXXXXXXX — empty means analytics is off
+export const MEASUREMENT_ID = 'G-FZ76Z2ZFKD' // Integ Games property; empty string turns analytics off
 
 const TITLES: Record<ToyId, string> = {
   charge: 'Toy · Charge Burst',
