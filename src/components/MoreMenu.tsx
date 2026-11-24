@@ -1,13 +1,14 @@
 import { useState } from 'react'
+import { t, type ToyId } from '../i18n'
 
-export const SITES = [
-  { id: 'charge', url: 'https://charge.integ.life', icon: '💥', name: '蓄力核爆', en: 'Charge Burst' },
-  { id: 'void', url: 'https://void.integ.life', icon: '🕳️', name: '黑洞收割', en: 'Void Harvest' },
-  { id: 'smash', url: 'https://smash.integ.life', icon: '🔨', name: '暴力碎屏', en: 'Glass Smash' },
-  { id: 'pop', url: 'https://pop.integ.life', icon: '🫧', name: '连锁泡泡', en: 'Chain Pop' },
-] as const
+const SITES: { id: ToyId; icon: string }[] = [
+  { id: 'charge', icon: '💥' },
+  { id: 'void', icon: '🕳️' },
+  { id: 'smash', icon: '🔨' },
+  { id: 'pop', icon: '🫧' },
+]
 
-export function MoreMenu({ current }: { current: string }) {
+export function MoreMenu({ current }: { current: ToyId }) {
   const [open, setOpen] = useState(false)
   return (
     <div className="fixed bottom-3 right-3 z-20 flex flex-col items-end gap-2 select-none" onPointerDown={(e) => e.stopPropagation()}>
@@ -16,16 +17,15 @@ export function MoreMenu({ current }: { current: string }) {
           {SITES.map((s) => (
             <a
               key={s.id}
-              href={s.id === current ? undefined : s.url}
+              href={s.id === current ? undefined : `https://${s.id}.integ.life`}
               className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm ${s.id === current ? 'bg-white/15 text-white' : 'text-white/80 hover:bg-white/10 active:bg-white/20'}`}
             >
               <span className="text-lg">{s.icon}</span>
-              <span>{s.name}</span>
-              <span className="text-xs text-white/40">{s.en}</span>
+              <span>{t(`name_${s.id}`)}</span>
             </a>
           ))}
           <a href="https://games.integ.life" className="rounded-xl px-3 py-1.5 text-xs text-white/50 hover:bg-white/10">
-            更多游戏 · games.integ.life →
+            {t('more_games')}
           </a>
         </div>
       )}

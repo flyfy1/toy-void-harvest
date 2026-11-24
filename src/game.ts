@@ -1,4 +1,6 @@
 import { audio, pentaFreq } from './engine/AudioEngine'
+import { track } from './analytics'
+import { t as tr } from './i18n'
 import { Flash, HitStop, Particles, Shake, clamp, easeOutBack, haptic, rand, runLoop, setupCanvas } from './engine/juice'
 
 const COLORS = ['#ff2d75', '#ffb020', '#f5ff3b', '#3bff8f', '#22d3ee', '#6d7bff', '#c45bff']
@@ -178,8 +180,9 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
     audio.subDrop(0.5)
     for (let k = 0; k < 3; k++) rings.push({ r: 10, v: 900 + k * 600, life: 0.8 - k * 0.15, hue: 280 - k * 60 })
     parts.burst(hole.x, hole.y, 420, { speed: 1400, life: 1.2, size: 5 })
-    banner = { text: 'CLEAR!', sub: t < 5 ? `⚡ ${t.toFixed(2)}s 极速清屏` : `${t.toFixed(2)}s`, t: 1 }
+    banner = { text: 'CLEAR!', sub: t < 5 ? tr('void_fast', { t: t.toFixed(2) }) : `${t.toFixed(2)}s`, t: 1 }
     clearAt = time + 0.8
+    track('wave_clear', { wave, seconds: Math.round(t * 10) / 10 })
   }
 
   const update = (dt: number) => {
