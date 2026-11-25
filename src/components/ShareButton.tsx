@@ -3,6 +3,7 @@ import { t, type ToyId } from '../i18n'
 import { NETWORKS, shareText, shareUrl, stats } from '../share'
 import { track } from '../analytics'
 import { pillClass } from './MoreMenu'
+import { IconClose, IconShare } from './Icons'
 
 const isTouch = () => typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
 
@@ -67,7 +68,8 @@ export function ShareButton({ toy }: { toy: ToyId }) {
   return (
     <>
       <button type="button" onClick={start} className={pillClass(toy)}>
-        ↗ {t('share')}
+        <IconShare />
+        {t('share')}
       </button>
       {open && (
         <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/60 p-3 sm:items-center" onClick={() => setOpen(false)}>
@@ -79,8 +81,8 @@ export function ShareButton({ toy }: { toy: ToyId }) {
           >
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold">{t('share_heading')}</h2>
-              <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="h-8 w-8 rounded-full bg-white/10 hover:bg-white/20">
-                ✕
+              <button type="button" onClick={() => setOpen(false)} aria-label="Close" className="flex h-11 w-11 items-center justify-center rounded-full bg-white/10 hover:bg-white/20">
+                <IconClose />
               </button>
             </div>
             <p className="mb-3 text-sm leading-relaxed text-white/75">{payload.text}</p>
