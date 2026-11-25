@@ -2,7 +2,15 @@ import { useEffect, useRef, useState } from 'react'
 import { MoreMenu } from './components/MoreMenu'
 import { applyMeta, t } from './i18n'
 import { startAnalytics, track } from './analytics'
-import { trackLanding } from './share'
+import { landing, peakEvery, trackLanding } from './share'
+import { Tag } from './components/Tag'
+
+/** a challenge link's time (pop and void carry the sender's seconds as `t`) */
+const RIVAL = (() => {
+  // same rule as rivalTime in cards.ts: rounded to 0.1, nothing for a mad number
+  const v = landing.recipient ? Number(new URLSearchParams(location.search).get('t')) : 0
+  return v > 0 && v < 3600 ? Math.round(v * 10) / 10 : 0
+})()
 import { startGame } from './game'
 
 const COARSE = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
@@ -16,6 +24,8 @@ export default function App() {
     applyMeta('void')
     startAnalytics('void')
     trackLanding()
+    let clears = 0
+    let last: HTMLCanvasElement | null = null
     return startGame(
       ref.current!,
       over.current!,
@@ -24,6 +34,11 @@ export default function App() {
         track('play_start')
       },
       hud.current,
+      // the GL canvas reads back blank outside its frame: between pictures the card keeps the last one
+      (snap, data) => {
+        if (snap) last = snap
+        peakEvery('void', ++clears, { snap: snap ?? last, data })
+      },
     )
   }, [])
   return (
@@ -36,6 +51,7 @@ export default function App() {
       />
       {/* Touch already unlocks sound on the first drag; a mouse can sweep a whole wave silently, so it keeps the "click for sound" clause. */}
       <VoidHint text={t(COARSE ? 'hint_void_touch' : 'hint_void')} hidden={touched} />
+      {RIVAL > 0 && <Tag text={t('void_tag', { s: RIVAL })} className="top-14" paper="bg-[#F7F4EC] text-[#22201C] font-medium" />}
       <MoreMenu current="void" />
     </>
   )

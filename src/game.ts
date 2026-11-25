@@ -54,7 +54,15 @@ const WHITE_UV = (() => {
   return [cx, cy, cx, cy]
 })()
 
-export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement, onFirst: () => void, hud?: HTMLElement | null): () => void {
+/** the clutter groups the share card counts (cards.ts VOID_ATE): socks, receipt, keys, charger, unread, client email, Monday */
+const GROUP: Record<number, number> = { [K.SockA]: 0, [K.SockB]: 0, [K.SockC]: 0, [K.Receipt]: 1, [K.Keys]: 2, [K.Charger]: 3, [K.Bubble]: 4, [K.Email]: 5, [K.Monday]: 6 }
+const GROUP_KEYS = ['sock', 'receipt', 'keys', 'charger', 'bubble', 'email', 'monday']
+
+/**
+ * `onPeak`: a wave cleared (after the hole gives something back, when it does), with a picture taken in
+ * the render frame (WebGL reads back blank later) and the numbers for the card.
+ */
+export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement, onFirst: () => void, hud?: HTMLElement | null, onPeak?: (snap: HTMLCanvasElement | null, data: Record<string, number>) => void): () => void {
   const q = new URLSearchParams(location.search)
   const DEV = import.meta.env.DEV
   const seed = Number(q.get('seed') ?? 1) || 1
@@ -157,6 +165,10 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   let wave = 0
   let waveTime = 0
   let eatenWave = 0
+  const ateWave = GROUP_KEYS.map(() => 0)
+  let peakData: Record<string, number> | null = null
+  let snapAt = 0
+  let snapN = 0
   let waveN = 1
   let clearAt = -1
   let banner = { text: '', sub: '', t: 0, rate: 0.75 }
@@ -219,6 +231,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     waveN = alive
     resized = false
     eatenWave = 0
+    ateWave.fill(0)
     waveTime = 0
     wave++
   }
@@ -286,6 +299,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     it.state = 2
     alive--
     eatenWave++
+    if (!it.ret && GROUP[it.k] !== undefined) ateWave[GROUP[it.k]]++
     hole.pulse = 1
     hole.heat = Math.min(1, hole.heat + 0.12)
     step = time - lastEat < 0.4 ? step + 1 : 0
@@ -336,6 +350,10 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
       clearAt = time + 0.8
     }
     track('wave_clear', { wave, seconds: Math.round(t * 10) / 10 })
+    peakData = { s: Math.round(t * 10) / 10, back: 0 }
+    GROUP_KEYS.forEach((k, i) => (peakData![k] = ateWave[i]))
+    // a burp to come: the picture waits for the thing it gives back
+    if (!willBurp) snapAt = time + 0.05
     stats.n = Math.min(stats.n ?? Infinity, Number(t.toFixed(2)))
   }
 
@@ -418,6 +436,10 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
           shake.add(0.35)
           gw = { r: hole.r, a: 0.6 }
           track('void_return', { item: r.id })
+          if (peakData) {
+            peakData.back = RETURNS.indexOf(r) + 1
+            snapAt = time + 0.45
+          }
         }
         // damped spring k 260, c 12
         hole.sv += (-(hole.scale - 1) * 260 - hole.sv * 12) * dt
@@ -829,6 +851,27 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     }
   }
 
+  /** The card's picture, from the frame just drawn on the GL (or fallback) canvas. */
+  const peakSnap = () => {
+    const data = peakData!
+    snapAt = 0
+    peakData = null
+    let snap: HTMLCanvasElement | null = null
+    // a picture only on the clears that get a card (the share cadence: 1st, 5th, 20th, 50th)
+    if ([1, 5, 20, 50].includes(++snapN)) try {
+      const src = fb && !gl ? fb : canvas
+      const k = Math.min(1, 1000 / src.width)
+      snap = document.createElement('canvas')
+      snap.width = Math.round(src.width * k)
+      snap.height = Math.round(src.height * k)
+      const c = snap.getContext('2d')!
+      // the overlay's caption would be cut by the card's crop; the clutter itself is on this canvas
+      c.drawImage(src, 0, 0, snap.width, snap.height)
+    } catch {
+      snap = null
+    }
+    onPeak?.(snap, data)
+  }
   const stopLoop = runLoop((dt, now) => {
     if (frozen) {
       draw(simNow)
@@ -838,6 +881,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     const t0 = DEV ? performance.now() : 0
     if (!stop.active) stepSim(dt)
     draw(now)
+    if (snapAt && time >= snapAt && peakData) peakSnap()
     if (DEV) cpuLog.push(performance.now() - t0)
   })
 

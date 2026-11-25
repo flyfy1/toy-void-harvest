@@ -1,7 +1,7 @@
 // The documents as data, the share lines and the share-sheet copy (loaded on demand with the sheet).
 // A document: title, two to four rows, a verdict, one line of small print, the call line by the QR.
-// knock 功德结算单, smash 事故认定书, squish 谅解书, scratch 兑奖凭证 / 中奖凭证, purr (its own receipt), and the
-// default document the other toys fall back to.
+// knock 功德结算单, smash 事故认定书, squish 谅解书, scratch 兑奖凭证 / 中奖凭证, charge 血压测量单, pop 快递签收单,
+// void 失物招领, peel 撕膜证明, purr (its own receipt), and the default document the unreleased toys fall back to.
 import { locale, tx, type Locale, type ToyId } from './i18n'
 import { MINE, bunQuery, canon, catQuery, encodeWords, hopOut, landing, live, stats, store, type Method, type Peak } from './share'
 
@@ -477,6 +477,288 @@ const SCRATCH = {
 /** the built-in prizes, in the order the game numbers them for the card (data.prize) */
 export const PRIZES = ['slack', 'coffee', 'nap', 'cat', 'merit', 'dayoff'] as const
 
+/** charge: 血压单 / Blood Pressure Reading. */
+const CHARGE = {
+  en: {
+    title: 'Blood Pressure Reading',
+    who: ['Patient', 'one pufferfish'],
+    blew: ['Blew up', '{n} times'],
+    blew1: ['Blew up', 'once'],
+    pfft: ['Lost it early (pfft)', '{p}'],
+    verdict: '“It cracked before you did”',
+    small: 'Doctor’s note: mute the work chat.',
+    done: 'I made a pufferfish lose it {n} times. It cracked before I did. Try:',
+    done1: 'I made a pufferfish lose it. It cracked before I did. Try:',
+    invite: 'Hold to make a pufferfish furious. Then let go:',
+  },
+  'zh-CN': {
+    title: '血压测量单',
+    who: ['被测者', '河豚'],
+    blew: ['气炸', '{n} 次'],
+    blew1: ['气炸', '1 次'],
+    pfft: ['没憋住（噗）', '{p} 次'],
+    verdict: '「它比你先破防」',
+    small: '医嘱：少看工作群。',
+    done: '我把河豚气炸了 {n} 次，它比我先破防。你试试：',
+    done1: '我把河豚气炸了，它比我先破防。你试试：',
+    invite: '按住，把河豚气成球。松手试试：',
+  },
+  es: {
+    title: 'Toma de tensión',
+    who: ['Paciente', 'un pez globo'],
+    blew: ['Explotó', '{n} veces'],
+    blew1: ['Explotó', '1 vez'],
+    pfft: ['Se desinfló antes (pfff)', '{p}'],
+    verdict: '«Se rompió antes que tú»',
+    small: 'Indicación médica: silencia el chat del trabajo.',
+    done: 'He sacado de quicio a un pez globo {n} veces. Se rompió antes que yo. Prueba:',
+    done1: 'He sacado de quicio a un pez globo. Se rompió antes que yo. Prueba:',
+    invite: 'Mantén pulsado para enfadar a un pez globo. Luego suelta:',
+  },
+  fr: {
+    title: 'Relevé de tension',
+    who: ['Patient', 'un poisson-globe'],
+    blew: ['Explosé', '{n} fois'],
+    blew1: ['Explosé', '1 fois'],
+    pfft: ['Craqué trop tôt (pfft)', '{p}'],
+    verdict: '« Il a craqué avant vous »',
+    small: 'Prescription : couper le groupe du bureau.',
+    done: 'J’ai fait craquer un poisson-globe {n} fois. Il a lâché avant moi. Essayez :',
+    done1: 'J’ai fait craquer un poisson-globe. Il a lâché avant moi. Essayez :',
+    invite: 'Appuyez pour énerver un poisson-globe. Puis lâchez :',
+  },
+  ja: {
+    title: '血圧測定票',
+    who: ['被測定者', 'フグ'],
+    blew: ['爆発', '{n} 回'],
+    blew1: ['爆発', '1 回'],
+    pfft: ['こらえきれず（ぷっ）', '{p} 回'],
+    verdict: '「先にキレたのはフグ」',
+    small: '医師より：仕事のグループは通知オフに。',
+    done: 'フグを {n} 回キレさせました。先に折れたのはフグ。やってみて：',
+    done1: 'フグをキレさせました。先に折れたのはフグ。やってみて：',
+    invite: '長押しでフグを怒らせて、離してみて：',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+
+/** pop: 快递签收单 / Proof of Delivery. */
+const POP = {
+  en: {
+    title: 'Proof of Delivery',
+    contents: ['Contents', 'air'],
+    qty: ['Quantity', '{n} cells'],
+    time: ['Time', '{s} s'],
+    note: ['Note', 'one refused. Complaint filed'],
+    rival: ['Rival', '{s} s'],
+    verdict: '“Signed for by: someone who should be working”',
+    small: 'Fragile. No longer applicable.',
+    done_dud: 'I popped a whole sheet in {s}s. One bubble refused. Your go:',
+    done: 'I popped a whole sheet in {s}s. Not one left. Your go:',
+    invite: 'A sheet of bubble wrap that never runs out. Go on:',
+  },
+  'zh-CN': {
+    title: '快递签收单',
+    contents: ['内件', '空气'],
+    qty: ['数量', '{n} 格'],
+    time: ['用时', '{s} 秒'],
+    note: ['备注', '一格捏不爆，已投诉'],
+    rival: ['对手', '{s} 秒'],
+    verdict: '「签收人：手欠本人」',
+    small: '易碎品。已全部碎完。',
+    done_dud: '我 {s} 秒捏完一整张泡泡纸，有一格死活不爆。你来：',
+    done: '我 {s} 秒捏完一整张泡泡纸，一格不剩。你来：',
+    invite: '一张捏不完的泡泡纸，来捏：',
+  },
+  es: {
+    title: 'Albarán de entrega',
+    contents: ['Contenido', 'aire'],
+    qty: ['Cantidad', '{n} burbujas'],
+    time: ['Tiempo', '{s} s'],
+    note: ['Nota', 'una no explotó. Reclamada'],
+    rival: ['Rival', '{s} s'],
+    verdict: '«Firmado: alguien que debería estar trabajando»',
+    small: 'Frágil. Ya no aplica.',
+    done_dud: 'He reventado una hoja entera en {s} s. Una burbuja se resistió. Te toca:',
+    done: 'He reventado una hoja entera en {s} s. Ni una en pie. Te toca:',
+    invite: 'Una hoja de plástico de burbujas que no se acaba. Venga:',
+  },
+  fr: {
+    title: 'Bon de livraison',
+    contents: ['Contenu', 'de l’air'],
+    qty: ['Quantité', '{n} bulles'],
+    time: ['Durée', '{s} s'],
+    note: ['Remarque', 'une a résisté. Réclamée'],
+    rival: ['Adversaire', '{s} s'],
+    verdict: '« Reçu par : quelqu’un qui devrait travailler »',
+    small: 'Fragile. Ne s’applique plus.',
+    done_dud: 'J’ai éclaté une feuille entière en {s} s. Une bulle a résisté. À vous :',
+    done: 'J’ai éclaté une feuille entière en {s} s. Pas une de reste. À vous :',
+    invite: 'Une feuille de papier bulle qui ne finit jamais. Allez-y :',
+  },
+  ja: {
+    title: '配達受領書',
+    contents: ['内容物', '空気'],
+    qty: ['数量', '{n} 粒'],
+    time: ['所要時間', '{s} 秒'],
+    note: ['備考', '1 粒割れず、クレーム済み'],
+    rival: ['ライバル', '{s} 秒'],
+    verdict: '「受取人：仕事中のはずの本人」',
+    small: '割れ物注意。すでに全部割れています。',
+    done_dud: 'プチプチ 1 枚を {s} 秒で潰しました。1 粒だけ割れず。次どうぞ：',
+    done: 'プチプチ 1 枚を {s} 秒で潰しました。1 粒も残さず。次どうぞ：',
+    invite: '終わらないプチプチ。どうぞ：',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+
+/** void: 失物招领 / Lost Property. Short names for the clutter (the card's own, kept short). */
+const VOID = {
+  en: {
+    title: 'Lost Property',
+    time: ['Time', '{s} s'],
+    ate: 'Swallowed',
+    back: ['Returned', '{item} ×1'],
+    v_sock: '“The other one stays”',
+    v_back: '“Nothing else is coming back”',
+    v_none: '“No returns”',
+    small: 'Monday will not be returned.',
+    done_sock: 'I swallowed Monday in {s}s. The hole gave one sock back. Beat that:',
+    done: 'I swallowed Monday in {s}s, socks and all. Beat that:',
+    invite: 'Be a black hole. Swallow Monday:',
+    sock: 'socks', receipt: 'receipts', keys: 'keys', charger: 'chargers', bubble: 'unread', email: 'emails', monday: 'Monday',
+    r_sock: 'a sock', r_tie: 'a hair tie', r_bud: 'an earbud', r_umbrella: 'an umbrella',
+  },
+  'zh-CN': {
+    title: '失物招领',
+    time: ['用时', '{s} 秒'],
+    ate: '吞没',
+    back: ['已归还', '{item} ×1'],
+    v_sock: '「另一只不予归还」',
+    v_back: '「其余概不归还」',
+    v_none: '「概不归还」',
+    small: '周一概不退还。',
+    done_sock: '我 {s} 秒把周一吞了，黑洞还了我一只袜子。你能更快吗：',
+    done: '我 {s} 秒把周一吞了，连袜子都没剩。你能更快吗：',
+    invite: '变成黑洞，把周一吸走：',
+    sock: '袜子', receipt: '小票', keys: '钥匙', charger: '充电头', bubble: '未读消息', email: '客户邮件', monday: '周一',
+    r_sock: '袜子', r_tie: '发圈', r_bud: '耳机', r_umbrella: '雨伞',
+  },
+  es: {
+    title: 'Objetos perdidos',
+    time: ['Tiempo', '{s} s'],
+    ate: 'Tragado',
+    back: ['Devuelto', '{item} ×1'],
+    v_sock: '«El otro se queda»',
+    v_back: '«Lo demás no vuelve»',
+    v_none: '«No se aceptan devoluciones»',
+    small: 'El lunes no se devuelve.',
+    done_sock: 'Me he tragado el lunes en {s} s. El agujero me devolvió un calcetín. Supéralo:',
+    done: 'Me he tragado el lunes en {s} s, calcetines incluidos. Supéralo:',
+    invite: 'Sé un agujero negro. Trágate el lunes:',
+    sock: 'calcetines', receipt: 'tiques', keys: 'llaves', charger: 'cargadores', bubble: 'no leídos', email: 'correos', monday: 'lunes',
+    r_sock: 'un calcetín', r_tie: 'una goma del pelo', r_bud: 'un auricular', r_umbrella: 'un paraguas',
+  },
+  fr: {
+    title: 'Objets trouvés',
+    time: ['Durée', '{s} s'],
+    ate: 'Avalé',
+    back: ['Rendu', '{item} ×1'],
+    v_sock: '« L’autre reste ici »',
+    v_back: '« Le reste ne revient pas »',
+    v_none: '« Ni repris ni échangé »',
+    small: 'Le lundi ne sera pas rendu.',
+    done_sock: 'J’ai avalé lundi en {s} s. Le trou m’a rendu une chaussette. Faites mieux :',
+    done: 'J’ai avalé lundi en {s} s, chaussettes comprises. Faites mieux :',
+    invite: 'Soyez un trou noir. Avalez lundi :',
+    sock: 'chaussettes', receipt: 'tickets', keys: 'clés', charger: 'chargeurs', bubble: 'non lus', email: 'mails', monday: 'lundi',
+    r_sock: 'une chaussette', r_tie: 'un élastique', r_bud: 'un écouteur', r_umbrella: 'un parapluie',
+  },
+  ja: {
+    title: '落とし物',
+    time: ['所要時間', '{s} 秒'],
+    ate: '吸い込んだ物',
+    back: ['返却', '{item} ×1'],
+    v_sock: '「もう片方は返しません」',
+    v_back: '「ほかは返しません」',
+    v_none: '「返品不可」',
+    small: '月曜日は返却できません。',
+    done_sock: '{s} 秒で月曜日を吸い込みました。靴下が片方だけ返ってきた。もっと速く：',
+    done: '{s} 秒で月曜日を吸い込みました。靴下ごと。もっと速く：',
+    invite: 'ブラックホールになって、月曜日を吸い込もう：',
+    sock: '靴下', receipt: 'レシート', keys: '鍵', charger: '充電器', bubble: '未読', email: 'メール', monday: '月曜日',
+    r_sock: '靴下', r_tie: 'ヘアゴム', r_bud: 'イヤホン', r_umbrella: '傘',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+/** void's clutter groups and returns, in the order the game numbers them for the card */
+export const VOID_ATE = ['sock', 'receipt', 'keys', 'charger', 'bubble', 'email', 'monday'] as const
+export const VOID_BACK = ['sock', 'tie', 'bud', 'umbrella'] as const
+
+/** peel: 撕膜证明 / Certificate of Peeling. */
+const PEEL = {
+  en: {
+    title: 'Certificate of Peeling',
+    today: ['Films peeled today', '{n}'],
+    one: ['In one pull', '{k}'],
+    mum: ['Mum informed', 'no'],
+    v_remote: '“The remote was like that when I found it”',
+    v_one: '“One pull. No tearing.”',
+    v_else: '“Crooked still counts”',
+    small: 'Remove before use. No liability after removal.',
+    done: 'Peeled {n} films today. Mum does not know. I left you the remote:',
+    invite: 'There is a film waiting to be peeled. Mum is out:',
+  },
+  'zh-CN': {
+    title: '撕膜证明',
+    today: ['今日撕膜', '{n} 张'],
+    one: ['一口气撕完', '{k} 张'],
+    mum: ['我妈知情', '否'],
+    v_remote: '「遥控器的膜不是我撕的」',
+    v_one: '「一口气，没断」',
+    v_else: '「撕歪了也算」',
+    small: '撕前请勿使用。撕后概不负责。',
+    done: '今天撕了 {n} 张膜，我妈还不知道。遥控器那张留给你：',
+    invite: '有张膜等你撕。你妈不在：',
+  },
+  es: {
+    title: 'Certificado de despegado',
+    today: ['Láminas despegadas hoy', '{n}'],
+    one: ['De un tirón', '{k}'],
+    mum: ['Mamá lo sabe', 'no'],
+    v_remote: '«El mando ya estaba así»',
+    v_one: '«De un tirón. Sin romperse.»',
+    v_else: '«Torcido también cuenta»',
+    small: 'Retirar antes de usar. Sin responsabilidad después.',
+    done: 'Hoy he despegado {n} láminas. Mamá no lo sabe. Te he dejado la del mando:',
+    invite: 'Hay una lámina esperando a que la despegues. Mamá ha salido:',
+  },
+  fr: {
+    title: 'Certificat de décollage',
+    today: ['Films retirés aujourd’hui', '{n}'],
+    one: ['D’un seul geste', '{k}'],
+    mum: ['Maman au courant', 'non'],
+    v_remote: '« La télécommande était déjà nue »',
+    v_one: '« D’un geste. Sans déchirer. »',
+    v_else: '« De travers, ça compte aussi »',
+    small: 'À retirer avant usage. Aucune responsabilité après.',
+    done: 'J’ai retiré {n} films aujourd’hui. Maman ne sait rien. Je vous ai laissé la télécommande :',
+    invite: 'Un film attend d’être retiré. Maman est sortie :',
+  },
+  ja: {
+    title: 'フィルム剥離証明書',
+    today: ['本日はがした枚数', '{n} 枚'],
+    one: ['一気にはがした', '{k} 枚'],
+    mum: ['母の承知', 'なし'],
+    v_remote: '「リモコンのフィルムは最初からなかった」',
+    v_one: '「一気に、切れずに」',
+    v_else: '「曲がってもはがしたうち」',
+    small: '使用前にはがしてください。はがした後は責任を負いません。',
+    done: '今日はフィルムを {n} 枚はがしました。母はまだ知りません。リモコンの分はあなたに：',
+    invite: 'はがされ待ちのフィルムがあります。母は留守です：',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+
+/** pop and void: a recipient answers with their own time */
+const TIME_BACK: Record<Locale, string> = { en: 'Send your time back', 'zh-CN': '把成绩甩回去', es: 'Devuélvele tu tiempo', fr: 'Renvoyer votre temps', ja: 'タイムを送り返す' }
+
 /** purr: the receipt is drawn by the toy (receipt.ts); these are its share lines and the recipient's button. */
 const PURR = {
   en: {
@@ -546,6 +828,9 @@ export function shareUrl(toy: ToyId, method?: Method): string {
   else if ((toy === 'smash' || toy === 'knock' || toy === 'stamp') && stats.words?.length) q = `?w=${encodeWords(stats.words)}`
   else if (toy === 'purr') q = catQuery(stats.name || '', stats.coat || '')
   else if (toy === 'squish') q = bunQuery(stats.name || '', stats.skin || '')
+  // pop and void carry the sender's time as a challenge; every peel link starts on the remote
+  else if ((toy === 'pop' || toy === 'void') && store.done && store.peak?.data.s) q = `?t=${store.peak.data.s}`
+  else if (toy === 'peel') q = '?obj=remote'
   const base = `https://${toy}.integ.life/${q && GIFT_PAGE.includes(toy) ? 'g/' : ''}`
   if (method) q += `${q ? '&' : '?'}r=${method}${hopOut()}`
   return base + q
@@ -605,6 +890,24 @@ export function shareText(toy: ToyId): string {
       if (store.done && n) return fill(stats.name ? T.done : T.done0, { name: stats.name || '', n })
       return mine && stats.name ? fill(T.invite, { name: stats.name }) : tx('share_squish')
     }
+    case 'charge': {
+      const T = CHARGE[locale]
+      return store.done && n ? fill(n === 1 ? T.done1 : T.done, { n }) : T.invite
+    }
+    case 'pop': {
+      const T = POP[locale]
+      const p = store.peak?.data
+      return store.done && p?.s ? fill(p.dud ? T.done_dud : T.done, { s: p.s }) : T.invite
+    }
+    case 'void': {
+      const T = VOID[locale]
+      const p = store.peak?.data
+      return store.done && p?.s ? fill(p.back === 1 ? T.done_sock : T.done, { s: p.s }) : T.invite
+    }
+    case 'peel': {
+      const T = PEEL[locale]
+      return store.done && n ? fill(T.done, { n }) : T.invite
+    }
     case 'pour':
       return !n ? tx('share_pour') : stats.last === 'golden' ? tx('share_pour_golden', { n }) : tx('share_pour_stat', { n, k })
     default:
@@ -616,6 +919,7 @@ export function shareText(toy: ToyId): string {
 export function primaryLabel(toy: ToyId) {
   if (!landing.recipient) return S.primary
   if (toy === 'scratch' && store.peak?.data.gift) return SCRATCH[locale].primary
+  if ((toy === 'pop' || toy === 'void') && store.done && store.peak?.data.s) return TIME_BACK[locale]
   return toy === 'purr' ? PURR[locale].reply : S.reply
 }
 
@@ -698,6 +1002,67 @@ function scratchDoc(p: Record<string, number> | null): Doc | null {
   return null
 }
 
+
+/**
+ * A challenge link's time (pop, void: `t`, seconds), rounded to 0.1; 0 when absent, not a recipient, or not a
+ * sane number. pop's and void's App.tsx read it the same way for the tag (kept there, out of every main bundle).
+ */
+export function rivalTime(): number {
+  if (!landing.recipient) return 0
+  const v = Number(new URLSearchParams(location.search).get('t'))
+  return v > 0 && v < 3600 ? Math.round(v * 10) / 10 : 0
+}
+
+function chargeDoc(p: Record<string, number> | null): Doc {
+  const T = CHARGE[locale]
+  const n = p?.n ?? stats.n ?? 0
+  const rows: [string, string][] = [[T.who[0], T.who[1]]]
+  if (n) rows.push(n === 1 ? [T.blew1[0], T.blew1[1]] : [T.blew[0], fill(T.blew[1], { n })])
+  if (p?.p) rows.push([T.pfft[0], fill(T.pfft[1], { p: p.p })])
+  return { look: look('charge'), title: T.title, rows, focus: 0.45, verdict: T.verdict, small: T.small, call: S.call, host: 'charge.integ.life' }
+}
+
+function popDoc(p: Record<string, number> | null): Doc {
+  const T = POP[locale]
+  const rows: [string, string][] = [[T.contents[0], T.contents[1]]]
+  if (p?.cells) rows.push([T.qty[0], fill(T.qty[1], { n: p.cells })])
+  if (p?.s) rows.push([T.time[0], fill(T.time[1], { s: p.s })])
+  const r = rivalTime()
+  if (r) rows.push([T.rival[0], fill(T.rival[1], { s: r })])
+  if (p?.dud) rows.push([T.note[0], T.note[1]])
+  // four rows at most: with a rival and a dud, the contents (air) gives way
+  return { look: look('pop'), title: T.title, rows: rows.length > 4 ? rows.slice(1) : rows, focus: 0.5, verdict: T.verdict, small: T.small, call: S.call, host: 'pop.integ.life' }
+}
+
+function voidDoc(p: Record<string, number> | null): Doc {
+  const T = VOID[locale]
+  const rows: [string, string][] = []
+  if (p?.s) rows.push([T.time[0], fill(T.time[1], { s: p.s })])
+  const ate = VOID_ATE.map((k) => [k, p?.[k] ?? 0] as const)
+    .filter(([, c]) => c > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+  const sep = locale === 'zh-CN' || locale === 'ja' ? '、' : ', '
+  if (ate.length) rows.push([T.ate, ate.map(([k, c]) => `${T[k]} ×${c}`).join(sep)])
+  const back = p?.back ? VOID_BACK[p.back - 1] : undefined
+  if (back) rows.push([T.back[0], fill(T.back[1], { item: T[`r_${back}`] })])
+  const r = rivalTime()
+  if (r) rows.push([POP[locale].rival[0], fill(POP[locale].rival[1], { s: r })])
+  const verdict = back === 'sock' ? T.v_sock : back ? T.v_back : T.v_none
+  return { look: look('void'), title: T.title, rows, focus: 0.5, verdict, small: T.small, call: S.call, host: 'void.integ.life' }
+}
+
+function peelDoc(p: Record<string, number> | null): Doc {
+  const T = PEEL[locale]
+  const n = p?.n ?? stats.n ?? 0
+  const rows: [string, string][] = []
+  if (n) rows.push([T.today[0], fill(T.today[1], { n })])
+  if (p?.k) rows.push([T.one[0], fill(T.one[1], { k: p.k })])
+  rows.push([T.mum[0], T.mum[1]])
+  const verdict = p?.remote ? T.v_remote : p?.k ? T.v_one : T.v_else
+  return { look: look('peel'), title: T.title, rows, focus: 0.5, verdict, small: T.small, call: S.call, host: 'peel.integ.life' }
+}
+
 const quotes = () => (locale === 'zh-CN' || locale === 'ja' ? ['「', '」'] : locale === 'fr' ? ['« ', ' »'] : locale === 'es' ? ['«', '»'] : ['“', '”'])
 
 /** Every toy without its own document yet: its name and its current share line. */
@@ -712,5 +1077,9 @@ export function buildDoc(toy: ToyId, peak: Peak | null): Doc {
   if (toy === 'knock') return knockDoc(p)
   if (toy === 'smash') return smashDoc(p)
   if (toy === 'squish') return squishDoc(p)
+  if (toy === 'charge') return chargeDoc(p)
+  if (toy === 'pop') return popDoc(p)
+  if (toy === 'void') return voidDoc(p)
+  if (toy === 'peel') return peelDoc(p)
   return (toy === 'scratch' && scratchDoc(p)) || defaultDoc(toy)
 }

@@ -258,6 +258,17 @@ export function sharePeak(toy: ToyId, peak: Peak, quiet = false) {
   )
 }
 
+/**
+ * A peak that repeats (a pane, a burst, a sheet): a card with its slip at the 1st, 5th, 20th and 50th
+ * (drawing one is not free); in between only the numbers move (the sheet draws them when it opens).
+ */
+export function peakEvery(toy: ToyId, n: number, peak: Peak) {
+  if ([1, 5, 20, 50].includes(n)) return sharePeak(toy, peak)
+  store.toy = toy
+  store.peak = peak
+  store.done = true
+}
+
 export function openSheet(from: From) {
   store.sheet = from
   store.slip = 0
