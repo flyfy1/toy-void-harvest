@@ -2,7 +2,7 @@
 import { t, type ToyId } from './i18n'
 
 /** Best moment of this visit, written by the game, read when sharing. */
-export const stats: { n?: number; words?: string[]; name?: string; coat?: string; skin?: string } = {}
+export const stats: { n?: number; k?: number; words?: string[]; name?: string; coat?: string; skin?: string } = {}
 
 // ---------- smash / knock: custom words travel in the URL (?w=BUG,加班,老板) ----------
 
@@ -10,18 +10,18 @@ const MAX_WORDS = 10
 const MAX_LEN = 12
 
 /** Split user input / URL value into a clean word list. */
-export function parseWords(raw: string | null | undefined): string[] {
+export function parseWords(raw: string | null | undefined, maxLen = MAX_LEN): string[] {
   if (!raw) return []
   return raw
     .split(/[,，、;；\n]+/)
-    .map((w) => w.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, MAX_LEN))
+    .map((w) => w.replace(/[\u0000-\u001f\u007f]/g, '').trim().slice(0, maxLen))
     .filter(Boolean)
     .slice(0, MAX_WORDS)
 }
 
-export function wordsFromUrl(): string[] {
+export function wordsFromUrl(maxLen = MAX_LEN): string[] {
   try {
-    return parseWords(new URLSearchParams(location.search).get('w'))
+    return parseWords(new URLSearchParams(location.search).get('w'), maxLen)
   } catch {
     return []
   }
@@ -101,7 +101,7 @@ export function syncBunToUrl(name: string, skin: string) {
 
 export function shareUrl(toy: ToyId): string {
   const base = `https://${toy}.integ.life/`
-  if ((toy === 'smash' || toy === 'knock') && stats.words?.length) return `${base}?w=${encodeWords(stats.words)}`
+  if ((toy === 'smash' || toy === 'knock' || toy === 'scratch') && stats.words?.length) return `${base}?w=${encodeWords(stats.words)}`
   if (toy === 'purr') return base + catQuery(stats.name || '', stats.coat || '')
   if (toy === 'squish') return base + bunQuery(stats.name || '', stats.skin || '')
   return base
@@ -110,6 +110,7 @@ export function shareUrl(toy: ToyId): string {
 export function shareText(toy: ToyId): string {
   if (toy === 'smash' && stats.words?.length) return t('share_smash_words', { w: stats.words.join(', ') })
   if (toy === 'knock' && stats.words?.length) return t('share_knock_words', { w: stats.words.join(', ') })
+  if (toy === 'scratch') return stats.words?.length ? t('share_scratch_words') : stats.n ? t('share_scratch_stat', { n: stats.n, k: stats.k ?? 0 }) : t('share_scratch')
   if (toy === 'purr' && stats.name) return t('share_purr_name', { name: stats.name })
   if (toy === 'squish' && stats.name) return t('share_squish_name', { name: stats.name, n: stats.n || 0 })
   if (toy !== 'smash' && stats.n) return t(`share_${toy}_stat`, { n: stats.n })

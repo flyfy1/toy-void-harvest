@@ -14,6 +14,7 @@ const TITLES: Record<ToyId, string> = {
   pop: 'Toy · Chain Pop',
   knock: 'Toy · Knock on Wood',
   purr: 'Toy · Lap Cat',
+  scratch: 'Toy · Scratch That',
   squish: 'Toy · Squishy Bun',
 }
 

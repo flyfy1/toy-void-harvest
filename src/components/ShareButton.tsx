@@ -18,7 +18,7 @@ async function qrDataUrl(text: string): Promise<string> {
 
 /** knock / squish: the count rides along on the share event (a number, never user text). */
 const shareExtra = (toy: ToyId): Record<string, number> =>
-  toy === 'knock' && stats.n ? { total: stats.n } : toy === 'squish' && stats.n ? { squeezes: stats.n } : {}
+  toy === 'knock' && stats.n ? { total: stats.n } : toy === 'squish' && stats.n ? { squeezes: stats.n } : toy === 'scratch' ? { cards: stats.n ?? 0, wins: stats.k ?? 0 } : {}
 
 export function ShareButton({ toy }: { toy: ToyId }) {
   const [open, setOpen] = useState(false)
