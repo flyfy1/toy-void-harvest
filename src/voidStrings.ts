@@ -10,6 +10,7 @@ const S = {
     void_back_umbrella: 'Returned: an umbrella. Not yours.',
     void_fast: '{t}s speed clear',
     void_monday: 'MON',
+    void_client: 'CLIENT',
   },
   'zh-CN': {
     void_back_sock: '退回：袜子一只。另一只不退。',
@@ -18,6 +19,7 @@ const S = {
     void_back_umbrella: '退回：雨伞一把。不是你的那把。',
     void_fast: '{t}s 极速清屏',
     void_monday: '周一',
+    void_client: '甲方',
   },
   es: {
     void_back_sock: 'Devuelto: un calcetín. El otro se queda.',
@@ -26,6 +28,7 @@ const S = {
     void_back_umbrella: 'Devuelto: un paraguas. No es el tuyo.',
     void_fast: 'limpieza en {t}s',
     void_monday: 'LUN',
+    void_client: 'CLIENTE',
   },
   fr: {
     void_back_sock: "Rendu : une chaussette. L'autre reste.",
@@ -34,6 +37,7 @@ const S = {
     void_back_umbrella: 'Rendu : un parapluie. Pas le tien.',
     void_fast: 'écran vidé en {t}s',
     void_monday: 'LUN',
+    void_client: 'CLIENT',
   },
   ja: {
     void_back_sock: '返却：靴下片方。もう片方は返さない。',
@@ -42,6 +46,7 @@ const S = {
     void_back_umbrella: '返却：傘 1 本。あなたのではない。',
     void_fast: '{t} 秒で全消し',
     void_monday: '月曜',
+    void_client: '先方',
   },
 } satisfies Record<Locale, Record<string, string>>
 

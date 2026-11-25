@@ -88,7 +88,7 @@ void main(){
     float near=wn>0.?disk(length(dd),atan(dd.y,dd.x))*wn:0.;
     // brighter close in (the bent image is magnified), same factor for both halves so they meet cleanly
     float heat=(2.2+u_heat*.9)*(1.+.6*min(1.25/bq,1.));
-    em+=ramp(far*sh*heat)+ramp(near*heat);
+    em+=ramp((far*sh+near)*heat);
   }
   // photon ring: thin and lopsided (brighter on the approaching side and below, like M87*)
   float lop=.35+.65*pow(.5-.5*cos(ang-.6),1.3);
