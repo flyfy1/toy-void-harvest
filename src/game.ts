@@ -123,6 +123,10 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     if (gl) {
       gl.resize(stage.w, stage.h, dpr)
       gl.setBackground(sky)
+    } else {
+      // without GL the canvas still has to cover the screen: it is the one that takes the pointer
+      canvas.style.width = stage.w + 'px'
+      canvas.style.height = stage.h + 'px'
     }
     sizeFallback()
     overlay.width = Math.round(stage.w * dpr)
@@ -436,7 +440,8 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
       if (it.state === 2) continue
       it.appear -= dt
       if (it.appear > 0) continue
-      it.rot += it.spin * dt
+      // only a returned item spins (and settles); the rest just sway, so nothing ends up upside down
+      if (it.ret) it.rot += it.spin * dt
       if (it.state === 0) {
         if (it.vx || it.vy) {
           // ejected: drag 0.95 per frame, slow spin that settles
@@ -519,8 +524,9 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     y += Math.cos(t * 19 + it.phase * 1.3) * j + dy * near * 8
     // weak lensing: images stretch along the tangent, squash along the radius
     const g = 0.28 * clamp(Math.pow((capR * 1.05) / d, 2), 0, 1)
-    const c = Math.cos(it.rot)
-    const sn = Math.sin(it.rot)
+    const rot = it.rot + (it.ret ? 0 : Math.sin(t * 0.5 + it.phase) * 0.12)
+    const c = Math.cos(rot)
+    const sn = Math.sin(rot)
     const hw = s / 2
     const uv = UV[it.k]
     // warm light from the disk, per corner so the side facing the hole is brighter
