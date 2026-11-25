@@ -349,6 +349,7 @@ const SQUISH = {
 /** scratch: the gift ticket (sender), 兑奖凭证 (recipient after the reveal), 中奖凭证 (an ordinary win). */
 const SCRATCH = {
   en: {
+    call_gift: 'Scan to scratch it',
     gift: 'A Scratch Card for You',
     gift_v: '“I wrote the prize myself”',
     claim: 'Prize Claim',
@@ -373,6 +374,7 @@ const SCRATCH = {
     reply: 'Leave one for them',
   },
   'zh-CN': {
+    call_gift: '长按识别，刮开它',
     gift: '给你的刮刮卡',
     gift_v: '「奖品是我亲手写的」',
     claim: '兑奖凭证',
@@ -397,6 +399,7 @@ const SCRATCH = {
     reply: '也给 TA 留一张',
   },
   es: {
+    call_gift: 'Escanea y ráscalo',
     gift: 'Un rasca para ti',
     gift_v: '«El premio lo he escrito yo»',
     claim: 'Resguardo de premio',
@@ -421,6 +424,7 @@ const SCRATCH = {
     reply: 'Dejarle uno a esa persona',
   },
   fr: {
+    call_gift: 'Scannez et grattez',
     gift: 'Un ticket à gratter pour vous',
     gift_v: '« Le lot, je l’ai écrit moi-même »',
     claim: 'Bon de retrait',
@@ -445,6 +449,7 @@ const SCRATCH = {
     reply: 'Lui en laisser un',
   },
   ja: {
+    call_gift: '読み取って、削ってみて',
     gift: 'あなた宛てのスクラッチ',
     gift_v: '「賞品は手書きです」',
     claim: '引換証',
@@ -685,7 +690,7 @@ function squishDoc(p: Record<string, number> | null): Doc {
 function scratchDoc(p: Record<string, number> | null): Doc | null {
   const T = SCRATCH[locale]
   const base = { look: look('scratch'), focus: 0.5, contain: true, call: S.call, host: 'scratch.integ.life' }
-  if (stats.words?.length && authored()) return { ...base, title: T.gift, rows: [], snap: live.ticket?.() ?? null, verdict: T.gift_v, small: T.small }
+  if (stats.words?.length && authored()) return { ...base, call: T.call_gift, title: T.gift, rows: [], snap: live.ticket?.() ?? null, verdict: T.gift_v, small: T.small }
   const g = p?.gift && stats.words?.[p.gift - 1]
   if (g) return { ...base, title: T.claim, rows: [[T.prize, quotes().join(quote(g))], [T.how, T.how_gift]], verdict: T.claim_v, small: T.small }
   const id = p?.prize ? PRIZES[p.prize - 1] : undefined
