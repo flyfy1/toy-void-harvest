@@ -1031,7 +1031,7 @@ function popDoc(p: Record<string, number> | null): Doc {
   if (r) rows.push([T.rival[0], fill(T.rival[1], { s: r })])
   if (p?.dud) rows.push([T.note[0], T.note[1]])
   // four rows at most: with a rival and a dud, the contents (air) gives way
-  return { look: look('pop'), title: T.title, rows: rows.length > 4 ? rows.slice(1) : rows, focus: 0.5, verdict: T.verdict, small: T.small, call: S.call, host: 'pop.integ.life' }
+  return { look: look('pop'), title: T.title, rows: rows.length > 4 ? rows.slice(1) : rows, focus: p?.fy ?? 0.5, verdict: T.verdict, small: T.small, call: S.call, host: 'pop.integ.life' }
 }
 
 function voidDoc(p: Record<string, number> | null): Doc {
