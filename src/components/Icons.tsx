@@ -97,6 +97,15 @@ export const IconScratch = () => (
   </svg>
 )
 
+/** peel: a rounded rectangle with its corner folded back. */
+export const IconPeel = () => (
+  <svg {...S}>
+    <path d="M13.5 20.5H7.5A2.5 2.5 0 0 1 5 18V6a2.5 2.5 0 0 1 2.5-2.5h9A2.5 2.5 0 0 1 19 6v8" />
+    <path d="M19 14l-5.5 6.5" />
+    <path d="M19 14c-2.6-.2-4.7.4-5.5 1.6-.6 1-.5 2.8 0 4.9" />
+  </svg>
+)
+
 export const TOY_ICONS: Record<ToyId, () => JSX.Element> = {
   charge: IconCharge,
   void: IconVoid,
@@ -106,6 +115,7 @@ export const TOY_ICONS: Record<ToyId, () => JSX.Element> = {
   purr: IconPurr,
   squish: IconSquish,
   scratch: IconScratch,
+  peel: IconPeel,
 }
 
 // ---------- knock pills ----------

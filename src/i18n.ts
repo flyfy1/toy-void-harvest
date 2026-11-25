@@ -10,7 +10,7 @@ export const LOCALES = [
 ] as const
 
 export type Locale = (typeof LOCALES)[number]['code']
-export type ToyId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch'
+export type ToyId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch' | 'peel'
 
 const en = {
   name_charge: 'Charge Burst',
@@ -206,6 +206,25 @@ const en = {
   scratch_count_n1: "1 card · {k} wins",
   scratch_count_k1: "{n} cards · 1 win",
   scratch_count_11: "1 card · 1 win",
+  // peel (toy-peel-off)
+  name_peel: "Peel Off",
+  desc_peel: "A new phone in its box, factory film still on. Take the corner tab and pull: the film curls away with a fine crackle and the screen comes out clean. Then a steel panel, then the TV remote your mum said to leave alone. A tiny satisfying toy, no sign-up.",
+  hint_peel: "Pull the corner tab",
+  share_peel: "Peel the factory film off a brand-new phone:",
+  share_peel_stat: "I peeled {n} protective films today. Mum has not noticed.",
+  peel_count: "{n} films peeled",
+  peel_count_one: "1 film peeled",
+  peel_count_mum: "Films peeled: {n} · Mum informed: no",
+  peel_static: "Static.",
+  peel_still: "Still there.",
+  peel_layer: "There is another layer.",
+  peel_layer_last: "That was the last one. Probably.",
+  peel_mum: "Mum",
+  peel_mum_warn: "Leave that on! It keeps it clean.",
+  peel_mum_good: "Good.",
+  peel_mum_done: "…",
+  peel_remove: "REMOVE BEFORE USE",
+  peel_steel_labels: ["Rice", "Steam", "Timer", "Up", "Down", "On/Off"],
 }
 export type Messages = typeof en
 
@@ -403,6 +422,25 @@ const zhCN: Messages = {
   scratch_count_n1: "刮了 1 张 · 中 {k} 张",
   scratch_count_k1: "刮了 {n} 张 · 中 1 张",
   scratch_count_11: "刮了 1 张 · 中 1 张",
+  // peel (toy-peel-off)
+  name_peel: "撕膜",
+  desc_peel: "盒子里一台新手机，出厂膜还贴着。捏住角上的小标签往外撕：膜卷起来，细细地沙沙响，底下的屏幕干干净净。接着是一块不锈钢面板，然后是妈妈不让撕的电视遥控器。打开即玩的解压小玩具。",
+  hint_peel: "捏住角上的小标签，撕",
+  share_peel: "给一台新手机撕膜：",
+  share_peel_stat: "今天撕了 {n} 张膜。我妈还不知道。",
+  peel_count: "撕了 {n} 张膜",
+  peel_count_one: "撕了 1 张膜",
+  peel_count_mum: "撕了 {n} 张膜 · 我妈还不知道",
+  peel_static: "静电。",
+  peel_still: "还在。",
+  peel_layer: "还有一层。",
+  peel_layer_last: "这次真没了。大概。",
+  peel_mum: "妈",
+  peel_mum_warn: "别撕！撕了容易脏。",
+  peel_mum_good: "这还差不多。",
+  peel_mum_done: "……",
+  peel_remove: "使用前请撕去保护膜",
+  peel_steel_labels: ["精煮", "蒸煮", "预约", "加", "减", "开关"],
 }
 
 const es: Messages = {
@@ -599,6 +637,25 @@ const es: Messages = {
   scratch_count_n1: "1 cartón · {k} premios",
   scratch_count_k1: "{n} cartones · 1 premio",
   scratch_count_11: "1 cartón · 1 premio",
+  // peel (toy-peel-off)
+  name_peel: "Quita el Plástico",
+  desc_peel: "Un móvil nuevo en su caja, con el plástico de fábrica todavía puesto. Coge la pestaña de la esquina y tira: el plástico se enrolla con un crujido fino y la pantalla sale limpia. Luego un panel de acero y luego el mando de la tele que tu madre dijo que no tocaras. Un juguete pequeño y satisfactorio, sin registro.",
+  hint_peel: "Tira de la pestaña de la esquina",
+  share_peel: "Quítale el plástico a un móvil recién estrenado:",
+  share_peel_stat: "Hoy he quitado {n} plásticos protectores. Mamá aún no lo sabe.",
+  peel_count: "{n} plásticos quitados",
+  peel_count_one: "1 plástico quitado",
+  peel_count_mum: "Plásticos quitados: {n} · Mamá avisada: no",
+  peel_static: "Estática.",
+  peel_still: "Sigue ahí.",
+  peel_layer: "Hay otra capa.",
+  peel_layer_last: "Esa era la última. Seguramente.",
+  peel_mum: "Mamá",
+  peel_mum_warn: "¡No lo quites! Así no se ensucia.",
+  peel_mum_good: "Así me gusta.",
+  peel_mum_done: "…",
+  peel_remove: "RETIRAR ANTES DE USAR",
+  peel_steel_labels: ["Arroz", "Vapor", "Hora", "Más", "Menos", "On/Off"],
 }
 
 const fr: Messages = {
@@ -795,6 +852,25 @@ const fr: Messages = {
   scratch_count_n1: "1 ticket · {k} gagnés",
   scratch_count_k1: "{n} tickets · 1 gagné",
   scratch_count_11: "1 ticket · 1 gagné",
+  // peel (toy-peel-off)
+  name_peel: "Pelez-Moi Ça",
+  desc_peel: "Un téléphone neuf dans sa boîte, le film d'usine encore dessus. Prenez la languette du coin et tirez : le film s'enroule avec un fin crépitement et l'écran apparaît, net. Puis un panneau inox, puis la télécommande que votre mère vous a dit de laisser emballée. Un petit jouet satisfaisant, sans inscription.",
+  hint_peel: "Tirez la languette du coin",
+  share_peel: "Retirez le film d'un téléphone tout neuf :",
+  share_peel_stat: "J'ai retiré {n} films de protection aujourd'hui. Maman n'a rien vu.",
+  peel_count: "{n} films retirés",
+  peel_count_one: "1 film retiré",
+  peel_count_mum: "Films retirés : {n} · Maman prévenue : non",
+  peel_static: "Électricité statique.",
+  peel_still: "Toujours là.",
+  peel_layer: "Il y en a une autre.",
+  peel_layer_last: "C'était la dernière. Sans doute.",
+  peel_mum: "Maman",
+  peel_mum_warn: "Ne l'enlève pas ! Ça le protège.",
+  peel_mum_good: "C'est mieux.",
+  peel_mum_done: "…",
+  peel_remove: "À RETIRER AVANT USAGE",
+  peel_steel_labels: ["Riz", "Vapeur", "Minuterie", "Plus", "Moins", "Marche"],
 }
 
 
@@ -995,6 +1071,25 @@ const ja: Messages = {
   scratch_count_n1: "1 枚 · 当たり {k}",
   scratch_count_k1: "{n} 枚 · 当たり 1",
   scratch_count_11: "1 枚 · 当たり 1",
+  // peel (toy-peel-off)
+  name_peel: "ペリペリ保護フィルム",
+  desc_peel: "箱の中に新品のスマホ。出荷時のフィルムが貼ったまま。角のタブをつまんで引くと、フィルムがくるりと丸まり、細かいパリパリ音とともにはがれて、まっさらな画面が出てくる。次はステンレスのパネル、その次は母が「はがすな」と言ったテレビのリモコン。登録不要の小さな気持ちいいおもちゃ。",
+  hint_peel: "角のタブをつまんで、はがす",
+  share_peel: "新品スマホの保護フィルムをはがそう：",
+  share_peel_stat: "今日は保護フィルムを {n} 枚はがした。母にはまだバレていない。",
+  peel_count: "{n} 枚はがした",
+  peel_count_one: "1 枚はがした",
+  peel_count_mum: "はがした枚数：{n} · 母への報告：なし",
+  peel_static: "静電気。",
+  peel_still: "まだいる。",
+  peel_layer: "もう 1 枚ある。",
+  peel_layer_last: "これで最後。たぶん。",
+  peel_mum: "母",
+  peel_mum_warn: "はがさないで！汚れるでしょ。",
+  peel_mum_good: "それでいいの。",
+  peel_mum_done: "……",
+  peel_remove: "ご使用前にはがしてください",
+  peel_steel_labels: ["炊飯", "蒸し", "予約", "上", "下", "入/切"],
 }
 
 
@@ -1029,6 +1124,7 @@ export function t(key: StringKey, vars: Record<string, string | number> = {}): s
 export const smashWords = (): readonly string[] => M.smash_words
 export const knockVariants = (): readonly string[] => M.knock_variants
 export const chargePfft = (): readonly string[] => M.charge_pfft
+export const peelSteelLabels = (): readonly string[] => M.peel_steel_labels
 
 /** Localised <html lang>, <title> and description for the current toy. */
 export function applyMeta(toy: ToyId) {
