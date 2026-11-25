@@ -2,7 +2,7 @@
 import { t, type ToyId } from './i18n'
 
 /** Best moment of this visit, written by the game, read when sharing. */
-export const stats: { n?: number; words?: string[] } = {}
+export const stats: { n?: number; words?: string[]; name?: string; coat?: string } = {}
 
 // ---------- smash / knock: custom words travel in the URL (?w=BUG,加班,老板) ----------
 
@@ -36,17 +36,51 @@ export function syncWordsToUrl(words: string[]) {
   history.replaceState(null, '', url.toString())
 }
 
+// ---------- purr: the cat's name and coat travel in the URL (?n=Mochi&c=orange) ----------
+
+export const COATS = ['tabby', 'orange', 'tux', 'void'] as const
+export type Coat = (typeof COATS)[number]
+
+/** A cat name: control characters removed, at most 12 characters. */
+export const parseName = (raw: string | null | undefined): string => (raw || '').replace(/[\u0000-\u001f\u007f<>]/g, '').trim().slice(0, MAX_LEN)
+export const parseCoat = (raw: string | null | undefined): Coat => (COATS as readonly string[]).includes(raw || '') ? (raw as Coat) : 'tabby'
+
+export function catFromUrl(): { name: string; coat: Coat } {
+  try {
+    const q = new URLSearchParams(location.search)
+    return { name: parseName(q.get('n')), coat: parseCoat(q.get('c')) }
+  } catch {
+    return { name: '', coat: 'tabby' }
+  }
+}
+
+const catQuery = (name: string, coat: string) => {
+  const q: string[] = []
+  if (name) q.push(`n=${encodeURIComponent(name)}`)
+  if (coat && coat !== 'tabby') q.push(`c=${coat}`)
+  return q.length ? `?${q.join('&')}` : ''
+}
+
+/** Keep ?n=&c= in the address bar in sync (other query params are dropped, as with ?w=). */
+export function syncCatToUrl(name: string, coat: string) {
+  const url = new URL(location.href)
+  url.search = catQuery(name, coat)
+  history.replaceState(null, '', url.toString())
+}
+
 // ---------- payload ----------
 
 export function shareUrl(toy: ToyId): string {
   const base = `https://${toy}.integ.life/`
   if ((toy === 'smash' || toy === 'knock') && stats.words?.length) return `${base}?w=${encodeWords(stats.words)}`
+  if (toy === 'purr') return base + catQuery(stats.name || '', stats.coat || '')
   return base
 }
 
 export function shareText(toy: ToyId): string {
   if (toy === 'smash' && stats.words?.length) return t('share_smash_words', { w: stats.words.join(', ') })
   if (toy === 'knock' && stats.words?.length) return t('share_knock_words', { w: stats.words.join(', ') })
+  if (toy === 'purr' && stats.name) return t('share_purr_name', { name: stats.name })
   if (toy !== 'smash' && stats.n) return t(`share_${toy}_stat`, { n: stats.n })
   return t(`share_${toy}`)
 }
