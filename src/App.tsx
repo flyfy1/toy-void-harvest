@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MoreMenu } from './components/MoreMenu'
 import { applyMeta, t } from './i18n'
 import { startAnalytics, track } from './analytics'
+import { trackLanding } from './share'
 import { startGame } from './game'
 
 const COARSE = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
@@ -14,6 +15,7 @@ export default function App() {
   useEffect(() => {
     applyMeta('void')
     startAnalytics('void')
+    trackLanding()
     return startGame(
       ref.current!,
       over.current!,

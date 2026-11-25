@@ -1,12 +1,13 @@
 import { useState } from 'react'
-import { openAbout, t, type ToyId } from '../i18n'
+import { openAbout, t, type LiveId, type ToyId } from '../i18n'
 import { ShareButton } from './ShareButton'
 import { IconClose, IconGrid, IconInfo, TOY_ICONS } from './Icons'
 
-const SITES: ToyId[] = ['charge', 'void', 'smash', 'pop', 'knock', 'purr', 'squish', 'scratch', 'peel']
+/** The live toys (crunch, pour, stamp and zip join when they launch). */
+const SITES: LiveId[] = ['charge', 'void', 'smash', 'pop', 'knock', 'purr', 'squish', 'scratch', 'peel']
 
 /** Light toys (pale backgrounds) get dark-ink pills. */
-export const LIGHT_TOYS: ToyId[] = ['purr', 'pop', 'squish', 'peel']
+export const LIGHT_TOYS: ToyId[] = ['purr', 'pop', 'squish', 'peel', 'crunch']
 export const pillClass = (toy: ToyId) =>
   LIGHT_TOYS.includes(toy)
     ? 'inline-flex min-h-[44px] items-center gap-2 rounded-full border border-[#4A3A2C]/12 bg-[#FFF9F0]/78 px-[14px] text-sm font-medium leading-none text-[#4A3A2C]/90 shadow-[inset_0_1px_0_rgba(255,255,255,.7),0_4px_14px_rgba(74,58,44,.12)] backdrop-blur-md hover:bg-[#FFF9F0]/90 active:scale-95'

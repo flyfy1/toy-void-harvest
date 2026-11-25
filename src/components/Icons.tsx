@@ -1,6 +1,6 @@
 /** Inline line icons for pills and menus: 20 px, 1.75 px stroke, currentColor. No emoji in any button. */
 import type { JSX } from 'react'
-import type { ToyId } from '../i18n'
+import type { LiveId } from '../i18n'
 
 const S = { width: 20, height: 20, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.75, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const, 'aria-hidden': true }
 
@@ -106,7 +106,46 @@ export const IconPeel = () => (
   </svg>
 )
 
-export const TOY_ICONS: Record<ToyId, () => JSX.Element> = {
+/** crunch: a ball with a three-way crack. */
+export const IconCrunch = () => (
+  <svg {...S}>
+    <circle cx="12" cy="12" r="8.4" />
+    <path d="M12 12 9.4 6.4M12 12l5.9 1.2M12 12l-1.6 6.1" />
+  </svg>
+)
+
+/** pour: a tilted bottle neck over a glass. */
+export const IconPour = () => (
+  <svg {...S}>
+    <path d="M14.2 3.2 21 6.8l-1.4 2.6-4.9-.6-3.3 1.6" />
+    <path d="M14.2 3.2 11.4 10.4" />
+    <path d="M6 13h9l-1 8H7z" />
+    <path d="M10.5 11v1.5" />
+  </svg>
+)
+
+/** stamp: a handle over a short bar. */
+export const IconStamp = () => (
+  <svg {...S}>
+    <circle cx="12" cy="5.5" r="2.5" />
+    <path d="M10.8 8v4.5M13.2 8v4.5" />
+    <path d="M5.5 12.5h13v3.5h-13z" />
+    <path d="M5 20h14" />
+  </svg>
+)
+
+/** zip: a vertical line of teeth with a slider. */
+export const IconZip = () => (
+  <svg {...S}>
+    <path d="M12 3v4M12 17v4" />
+    <path d="M10 4.5h1.2M12.8 6h1.2M10 18h1.2M12.8 19.5h1.2" />
+    <path d="M9.5 8h5l-.8 6h-3.4z" />
+    <path d="M12 14v3" />
+  </svg>
+)
+
+/** The More menu's glyphs, live toys only (the others export their glyph for their own use). */
+export const TOY_ICONS: Record<LiveId, () => JSX.Element> = {
   charge: IconCharge,
   void: IconVoid,
   smash: IconSmash,

@@ -17,6 +17,10 @@ const TITLES: Record<ToyId, string> = {
   scratch: 'Toy · Scratch That',
   squish: 'Toy · Squishy Bun',
   peel: 'Toy · Peel Off',
+  crunch: 'Toy · Crispy Squish',
+  pour: 'Toy · Perfect Pour',
+  stamp: 'Toy · Rubber Stamp',
+  zip: 'Toy · Zip It',
 }
 
 type W = Window & { dataLayer?: unknown[] }
@@ -44,7 +48,7 @@ export function startAnalytics(toy: ToyId) {
   document.head.append(s)
 }
 
-/** Gameplay events (first touch, big moments). Numbers only, never user text. */
+/** Gameplay and share events (first touch, big moments, the share funnel). Numbers and fixed words only, never user text. */
 export function track(event: string, params: Record<string, number | string> = {}) {
   gtag?.('event', event, { send_to: MEASUREMENT_ID, ...params })
 }
