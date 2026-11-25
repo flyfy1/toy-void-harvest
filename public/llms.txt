@@ -41,7 +41,7 @@ No account and no personal data. At most, anonymous usage statistics (page views
 
 - [Charge Burst](https://charge.integ.life/): Hold to annoy a pufferfish until it puffs up and blows its spines off.
 - [Glass Smash](https://smash.integ.life/): Smash a pane of glass with the word you hate written on it.
-- [Chain Pop](https://pop.integ.life/): Pop neon bubbles, then set off a full-screen chain reaction.
+- [Chain Pop](https://pop.integ.life/): A sheet of parcel bubble wrap that never runs out. One bubble refuses to pop.
 - [Knock on Wood](https://knock.integ.life/): Tap a wooden fish. Merit +1.
 - [Lap Cat](https://purr.integ.life/): Pet a soft, purring cat on your screen. Mind the belly.
 - [Integ Games](https://games.integ.life/): more browser games

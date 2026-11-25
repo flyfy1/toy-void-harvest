@@ -76,7 +76,7 @@ export function ShareButton({ toy }: { toy: ToyId }) {
           <div
             role="dialog"
             aria-label={t('share_heading')}
-            className={`w-full max-w-sm rounded-3xl border border-white/15 ${toy === 'knock' ? 'bg-[#1f140d]' : toy === 'purr' ? 'bg-[#2a1f17]' : 'bg-[#0d0d1a]'} p-5 text-white shadow-2xl`}
+            className={`w-full max-w-sm rounded-3xl border border-white/15 ${toy === 'knock' ? 'bg-[#1f140d]' : toy === 'purr' || toy === 'pop' ? 'bg-[#2a1f17]' : 'bg-[#0d0d1a]'} p-5 text-white shadow-2xl`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="mb-3 flex items-center justify-between">
