@@ -34,7 +34,7 @@ export function wordsFromUrl(maxLen = MAX_LEN): string[] {
 export const encodeWords = (words: string[]) => words.map(encodeURIComponent).join(',')
 
 /** Replace the query and note it as written on this device (see `landing`). */
-function setSearch(search: string) {
+export function setSearch(search: string) {
   const url = new URL(location.href)
   url.search = search
   history.replaceState(null, '', url.toString())
@@ -186,6 +186,8 @@ export function trackShare(stage: 'method' | 'done', method: ShareMethod, from: 
 export interface Peak {
   snap: HTMLCanvasElement | null
   data: Record<string, number>
+  /** a toy that draws its own document (purr's receipt) hands over the finished picture */
+  card?: HTMLCanvasElement
 }
 
 export interface Card {
@@ -195,6 +197,8 @@ export interface Card {
   canvas: HTMLCanvasElement
   /** 1 for a peak card, 0 for the toy's default document */
   peak: 0 | 1
+  /** the peak it was drawn from (a newer peak means the sheet draws it again) */
+  of: Peak | null
 }
 
 export const store = {
@@ -223,8 +227,12 @@ export function emit() {
   subs.forEach((f) => f())
 }
 
-/** Optional, set by a toy: its own snapshot (a crop around the subject) and live numbers for the default card. */
-export const live: { snap: (() => HTMLCanvasElement | null) | null; data: (() => Record<string, number>) | null } = { snap: null, data: null }
+/**
+ * Optional, set by a toy: its own snapshot (a crop around the subject), live numbers for the card, and
+ * `reply`: what a recipient's answer button does (open the toy's text box, empty, for their own words);
+ * `ticket`: scratch's unscratched gift ticket for the sender's card.
+ */
+export const live: { snap: (() => HTMLCanvasElement | null) | null; data: (() => Record<string, number>) | null; reply?: () => void; ticket?: () => HTMLCanvasElement | null } = { snap: null, data: null }
 
 /** Is a finger (or button) down right now? The slip never appears under a finger. */
 export const pointer = { down: false }

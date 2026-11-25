@@ -1,6 +1,7 @@
 // The documents as data, the share lines and the share-sheet copy (loaded on demand with the sheet).
 // A document: title, two to four rows, a verdict, one line of small print, the call line by the QR.
-// WP1 fills knock (功德结算单) and the default document every toy falls back to.
+// knock 功德结算单, smash 事故认定书, squish 谅解书, scratch 兑奖凭证 / 中奖凭证, purr (its own receipt), and the
+// default document the other toys fall back to.
 import { locale, tx, type Locale, type ToyId } from './i18n'
 import { MINE, bunQuery, canon, catQuery, encodeWords, hopOut, landing, live, stats, store, type Method, type Peak } from './share'
 
@@ -18,8 +19,13 @@ export interface Doc {
   title: string
   seal?: string
   rows: [string, string][]
+  /** a note instead of a form (squish): one paragraph where the rows would be */
+  body?: string
   /** where the snapshot's centre of interest is, top 0 to bottom 1 (default 0.5) */
   focus?: number
+  /** a picture of its own (scratch's unscratched gift ticket), shown whole rather than cropped */
+  snap?: HTMLCanvasElement | null
+  contain?: boolean
   verdict: string
   small: string
   call: string
@@ -212,6 +218,294 @@ const KNOCK = {
   },
 } satisfies Record<Locale, Record<string, string | string[]>>
 
+/** smash: 事故认定书 / Incident Report. */
+const SMASH = {
+  en: {
+    title: 'Incident Report',
+    cause: ['Cause', '“{w}”'],
+    damage: ['Damage', '{n} panes of tempered glass'],
+    damage1: ['Damage', '1 pane of tempered glass'],
+    fault: ['Fault', 'the glass, 100%'],
+    verdict: '“Suspect’s mood: much improved”',
+    small: 'Not valid for expense claims.',
+    done: 'I smashed “{w}”. Much better. I saved you a pane:',
+    done0: 'I smashed {n} panes of glass. Much better. I saved you one:',
+    invite: 'Someone left you a pane of glass. It says “{w}”:',
+    reply: 'Send one back',
+  },
+  'zh-CN': {
+    title: '事故认定书',
+    cause: ['事故原因', '「{w}」'],
+    damage: ['损失', '钢化玻璃 {n} 块'],
+    damage1: ['损失', '钢化玻璃 1 块'],
+    fault: ['责任认定', '玻璃全责'],
+    verdict: '「当事人情绪：稳定多了」',
+    small: '本单不可用于报销。',
+    done: '我把「{w}」砸了，舒服了。这块留给你：',
+    done0: '我砸了 {n} 块玻璃，舒服了。这块留给你：',
+    invite: '有人留了块玻璃给你，上面写着「{w}」：',
+    reply: '回敬一块',
+  },
+  es: {
+    title: 'Atestado del siniestro',
+    cause: ['Causa', '«{w}»'],
+    damage: ['Daños', '{n} lunas de vidrio templado'],
+    damage1: ['Daños', '1 luna de vidrio templado'],
+    fault: ['Responsable', 'el cristal, 100 %'],
+    verdict: '«Estado de ánimo del implicado: mucho mejor»',
+    small: 'No válido para notas de gastos.',
+    done: 'He reventado «{w}». Mucho mejor. Te he guardado un cristal:',
+    done0: 'He reventado {n} cristales. Mucho mejor. Te he guardado uno:',
+    invite: 'Alguien te ha dejado un cristal. Pone «{w}»:',
+    reply: 'Devuélvele uno',
+  },
+  fr: {
+    title: 'Constat d’incident',
+    cause: ['Cause', '« {w} »'],
+    damage: ['Dégâts', '{n} vitres en verre trempé'],
+    damage1: ['Dégâts', '1 vitre en verre trempé'],
+    fault: ['Responsabilité', 'la vitre, à 100 %'],
+    verdict: '« Humeur du suspect : bien meilleure »',
+    small: 'Non valable pour une note de frais.',
+    done: 'J’ai pulvérisé « {w} ». Ça va mieux. Je vous ai gardé une vitre :',
+    done0: 'J’ai pulvérisé {n} vitres. Ça va mieux. Je vous en ai gardé une :',
+    invite: 'Quelqu’un vous a laissé une vitre. Il y a écrit « {w} » :',
+    reply: 'En renvoyer une',
+  },
+  ja: {
+    title: '事故証明書',
+    cause: ['事故原因', '「{w}」'],
+    damage: ['損害', '強化ガラス {n} 枚'],
+    damage1: ['損害', '強化ガラス 1 枚'],
+    fault: ['過失割合', 'ガラス 100%'],
+    verdict: '「当事者の気分：だいぶ落ち着いた」',
+    small: '経費精算には使えません。',
+    done: '「{w}」を割りました。すっきり。あなたの分も一枚残しておきました：',
+    done0: 'ガラスを {n} 枚割りました。すっきり。あなたの分も一枚：',
+    invite: 'あなたにガラスが一枚。「{w}」と書いてあります：',
+    reply: '一枚お返し',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+
+/** squish: 谅解书 / Letter of Forgiveness. A note, not a form: one paragraph instead of rows. */
+const SQUISH = {
+  en: {
+    title: 'Letter of Forgiveness',
+    body: 'I, the bun known as “{name}”, was squeezed {n} times today and flattened {k} times. Having slowly risen, I forgive you.',
+    body0: 'I, a bun, was squeezed {n} times today and flattened {k} times. Having slowly risen, I forgive you.',
+    verdict: '“Do not let it happen again. (It may happen again.)”',
+    small: 'Signed in flour.',
+    done: 'I squeezed “{name}” {n} times and it forgave me. Your turn:',
+    done0: 'I squeezed a bun {n} times and it forgave me. Your turn:',
+    invite: 'Someone handed you “{name}”. Squeeze:',
+    reply: 'Send one back',
+  },
+  'zh-CN': {
+    title: '谅解书',
+    body: '本团子「{name}」今日被捏 {n} 下，捏扁 {k} 次。经慢慢回弹，现已原谅当事人。',
+    body0: '本团子今日被捏 {n} 下，捏扁 {k} 次。经慢慢回弹，现已原谅当事人。',
+    verdict: '「下不为例（可以为例）」',
+    small: '立书团：按粉印为证。',
+    done: '「{name}」被我捏了 {n} 下，它原谅我了。轮到你：',
+    done0: '我把团子捏了 {n} 下，它原谅我了。轮到你：',
+    invite: '有人把「{name}」交给你了。捏：',
+    reply: '回敬一只',
+  },
+  es: {
+    title: 'Carta de perdón',
+    body: 'Yo, el bollo llamado «{name}», he sido apretado {n} veces hoy y aplastado {k}. Tras subir despacito, te perdono.',
+    body0: 'Yo, un bollo, he sido apretado {n} veces hoy y aplastado {k}. Tras subir despacito, te perdono.',
+    verdict: '«Que no se repita. (Puede repetirse.)»',
+    small: 'Firmado con harina.',
+    done: 'He apretado a «{name}» {n} veces y me ha perdonado. Te toca:',
+    done0: 'He apretado un bollo {n} veces y me ha perdonado. Te toca:',
+    invite: 'Alguien te ha dejado a «{name}». Apriétalo:',
+    reply: 'Devuélvele uno',
+  },
+  fr: {
+    title: 'Lettre de pardon',
+    body: 'Moi, la brioche nommée « {name} », j’ai été pressée {n} fois aujourd’hui et aplatie {k} fois. Ayant lentement regonflé, je vous pardonne.',
+    body0: 'Moi, une brioche, j’ai été pressée {n} fois aujourd’hui et aplatie {k} fois. Ayant lentement regonflé, je vous pardonne.',
+    verdict: '« Que cela ne se reproduise pas. (Cela peut se reproduire.) »',
+    small: 'Signé à la farine.',
+    done: 'J’ai pressé « {name} » {n} fois et elle m’a pardonné. À vous :',
+    done0: 'J’ai pressé une brioche {n} fois et elle m’a pardonné. À vous :',
+    invite: 'Quelqu’un vous a confié « {name} ». Pressez :',
+    reply: 'En renvoyer une',
+  },
+  ja: {
+    title: '許し状',
+    body: '私、団子「{name}」は本日 {n} 回つままれ、{k} 回つぶされました。ゆっくり膨らみ直しましたので、許します。',
+    body0: '私、団子は本日 {n} 回つままれ、{k} 回つぶされました。ゆっくり膨らみ直しましたので、許します。',
+    verdict: '「二度としないように（してもいい）」',
+    small: '粉の手形をもって証とする。',
+    done: '「{name}」を {n} 回つまんだら、許してくれました。次はあなた：',
+    done0: '団子を {n} 回つまんだら、許してくれました。次はあなた：',
+    invite: '「{name}」を託されました。つまんで：',
+    reply: '一個お返し',
+  },
+} satisfies Record<Locale, Record<string, string>>
+
+/** scratch: the gift ticket (sender), 兑奖凭证 (recipient after the reveal), 中奖凭证 (an ordinary win). */
+const SCRATCH = {
+  en: {
+    gift: 'A Scratch Card for You',
+    gift_v: '“I wrote the prize myself”',
+    claim: 'Prize Claim',
+    prize: 'Prize',
+    how: 'To claim',
+    how_gift: 'send this to whoever wrote it',
+    claim_v: '“When do I collect?”',
+    small: 'Subject to the writer’s conscience.',
+    win: 'Winning Ticket',
+    win_v: '“Better odds than my raise”',
+    win_small: 'No cash value. No cash at all.',
+    how_slack: 'start staring now',
+    how_coffee: 'find someone to pay',
+    how_nap: 'close your eyes, quietly',
+    how_cat: 'open purr.integ.life',
+    how_merit: 'knock once on the wood',
+    how_dayoff: 'show this to your manager',
+    done_gift: 'I left you a scratch card. I wrote the prize myself. Scratch it:',
+    done_claim: 'I scratched it: “{w}”. When do I collect?',
+    done_win: '{n} cards, {k} wins. Better odds than my raise. I left you one:',
+    primary: 'Claim it',
+    reply: 'Leave one for them',
+  },
+  'zh-CN': {
+    gift: '给你的刮刮卡',
+    gift_v: '「奖品是我亲手写的」',
+    claim: '兑奖凭证',
+    prize: '奖品',
+    how: '兑奖方式',
+    how_gift: '把这张图发回给出题人',
+    claim_v: '「什么时候兑？」',
+    small: '最终解释权归写奖品的人。',
+    win: '中奖凭证',
+    win_v: '「比加薪概率高」',
+    win_small: '本券不可兑换现金，也没有现金。',
+    how_slack: '现在就发呆',
+    how_coffee: '找个人请你',
+    how_nap: '闭眼，别出声',
+    how_cat: '打开 purr.integ.life',
+    how_merit: '敲一下木鱼',
+    how_dayoff: '拿给领导看',
+    done_gift: '给你留了张刮刮卡，奖品我亲手写的。刮开：',
+    done_claim: '我刮出来了：「{w}」。什么时候兑？',
+    done_win: '我刮了 {n} 张，中了 {k} 张，比加薪概率高。给你留了一张：',
+    primary: '找 TA 兑奖',
+    reply: '也给 TA 留一张',
+  },
+  es: {
+    gift: 'Un rasca para ti',
+    gift_v: '«El premio lo he escrito yo»',
+    claim: 'Resguardo de premio',
+    prize: 'Premio',
+    how: 'Para cobrar',
+    how_gift: 'mándaselo a quien lo escribió',
+    claim_v: '«¿Cuándo lo cobro?»',
+    small: 'Sujeto a la conciencia de quien lo escribió.',
+    win: 'Boleto premiado',
+    win_v: '«Más probable que mi aumento»',
+    win_small: 'Sin valor en efectivo. Sin efectivo, en general.',
+    how_slack: 'empieza a mirar la pared ya',
+    how_coffee: 'busca quien invite',
+    how_nap: 'cierra los ojos, sin ruido',
+    how_cat: 'abre purr.integ.life',
+    how_merit: 'da un golpe a la madera',
+    how_dayoff: 'enséñaselo a tu jefe',
+    done_gift: 'Te he dejado un rasca. El premio lo he escrito yo. Ráscalo:',
+    done_claim: 'Lo he rascado: «{w}». ¿Cuándo lo cobro?',
+    done_win: '{n} rascas, {k} premios. Más probable que mi aumento. Te he dejado uno:',
+    primary: 'Reclamar el premio',
+    reply: 'Dejarle uno a esa persona',
+  },
+  fr: {
+    gift: 'Un ticket à gratter pour vous',
+    gift_v: '« Le lot, je l’ai écrit moi-même »',
+    claim: 'Bon de retrait',
+    prize: 'Lot',
+    how: 'Pour le retirer',
+    how_gift: 'renvoyez ceci à qui l’a écrit',
+    claim_v: '« C’est quand, que je passe le chercher ? »',
+    small: 'Sous réserve de la conscience de l’auteur.',
+    win: 'Ticket gagnant',
+    win_v: '« Plus probable que mon augmentation »',
+    win_small: 'Sans valeur monétaire. Sans monnaie du tout.',
+    how_slack: 'fixez le mur, dès maintenant',
+    how_coffee: 'trouvez qui paie',
+    how_nap: 'fermez les yeux, sans bruit',
+    how_cat: 'ouvrez purr.integ.life',
+    how_merit: 'frappez une fois le bois',
+    how_dayoff: 'montrez-le à votre chef',
+    done_gift: 'Je vous ai laissé un ticket à gratter. Le lot, je l’ai écrit moi-même. Grattez :',
+    done_claim: 'J’ai gratté : « {w} ». C’est quand, que je passe le chercher ?',
+    done_win: '{n} tickets, {k} gagnants. Plus probable que mon augmentation. Je vous en ai laissé un :',
+    primary: 'Réclamer le lot',
+    reply: 'Lui en laisser un',
+  },
+  ja: {
+    gift: 'あなた宛てのスクラッチ',
+    gift_v: '「賞品は手書きです」',
+    claim: '引換証',
+    prize: '賞品',
+    how: '引換方法',
+    how_gift: 'この画像を書いた人に送り返す',
+    claim_v: '「いつもらえる？」',
+    small: '最終的な解釈は書いた人の良心に委ねます。',
+    win: '当選証',
+    win_v: '「昇給より当たる」',
+    win_small: '換金不可。そもそも現金なし。',
+    how_slack: '今すぐぼーっとする',
+    how_coffee: 'おごってくれる人を探す',
+    how_nap: '目を閉じる。静かに',
+    how_cat: 'purr.integ.life を開く',
+    how_merit: '木魚をひと叩き',
+    how_dayoff: '上司に見せる',
+    done_gift: 'スクラッチを一枚置いておきました。賞品は手書きです。削って：',
+    done_claim: '削りました：「{w}」。いつもらえる？',
+    done_win: '{n} 枚削って {k} 枚当たり。昇給より当たる。あなたにも一枚：',
+    primary: '引き換えを頼む',
+    reply: 'お返しに一枚置く',
+  },
+} satisfies Record<Locale, Record<string, string>>
+/** the built-in prizes, in the order the game numbers them for the card (data.prize) */
+export const PRIZES = ['slack', 'coffee', 'nap', 'cat', 'merit', 'dayoff'] as const
+
+/** purr: the receipt is drawn by the toy (receipt.ts); these are its share lines and the recipient's button. */
+const PURR = {
+  en: {
+    done: 'I paid {name}’s cat tax. Rated {r}/5, fell for the belly {t} times. Cover my shift:',
+    done0: 'I paid the cat tax. Rated {r}/5, fell for the belly {t} times. Cover my shift:',
+    invite: 'There is a cat waiting to be petted. Mind the belly:',
+    reply: 'Send the receipt back',
+  },
+  'zh-CN': {
+    done: '{name}的猫税我交了，评分 {r}/5，中计 {t} 次。你来代个班：',
+    done0: '猫税我交了，评分 {r}/5，中计 {t} 次。你来代个班：',
+    invite: '有只猫等人摸。小心肚皮：',
+    reply: '把小票寄回去',
+  },
+  es: {
+    done: 'He pagado el impuesto gatuno de {name}. Nota {r}/5, caí {t} veces en la trampa de la barriga. Cúbreme el turno:',
+    done0: 'He pagado el impuesto gatuno. Nota {r}/5, caí {t} veces en la trampa de la barriga. Cúbreme el turno:',
+    invite: 'Hay un gato esperando caricias. Ojo con la barriga:',
+    reply: 'Devolver el tique',
+  },
+  fr: {
+    done: 'J’ai payé la taxe à chat de {name}. Note {r}/5, tombé {t} fois dans le piège du ventre. Prenez le relais :',
+    done0: 'J’ai payé la taxe à chat. Note {r}/5, tombé {t} fois dans le piège du ventre. Prenez le relais :',
+    invite: 'Un chat attend des caresses. Attention au ventre :',
+    reply: 'Renvoyer le ticket',
+  },
+  ja: {
+    done: '{name}の猫税、払いました。評価 {r}/5、お腹の罠に {t} 回。代わりにシフト入って：',
+    done0: '猫税、払いました。評価 {r}/5、お腹の罠に {t} 回。代わりにシフト入って：',
+    invite: '撫でられ待ちの猫がいます。お腹に注意：',
+    reply: 'レシートを送り返す',
+  },
+} satisfies Record<Locale, Record<string, string>>
+
 // ---------- looks (the toy's own surface and paper) ----------
 
 const DARK: Look = { surface: ['#1b1b22', '#0c0c12'], grain: 'rgba(255,255,255,0.025)', paper: '#F7F4EC', ink: '#22201C', faint: 'rgba(34,32,28,0.5)', accent: '#22201C', accent2: 'rgba(34,32,28,0.35)' }
@@ -231,12 +525,23 @@ const look = (toy: ToyId) => LOOKS[toy] ?? LOOKS.purr!
 // ---------- the link and the author ----------
 
 
+/** base64url of the UTF-8 text: scratch's prize travels as `g` so the address does not spoil it */
+export const b64u = (s: string) =>
+  btoa(String.fromCharCode(...new TextEncoder().encode(s)))
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '')
+
+/** The five toys with something to send have a /g/ page: same app, a link preview that says so. */
+const GIFT_PAGE: ToyId[] = ['knock', 'smash', 'scratch', 'squish', 'purr']
+
 export function shareUrl(toy: ToyId, method?: Method): string {
-  const base = `https://${toy}.integ.life/`
   let q = ''
-  if ((toy === 'smash' || toy === 'knock' || toy === 'scratch' || toy === 'stamp') && stats.words?.length) q = `?w=${encodeWords(stats.words)}`
+  if (toy === 'scratch' && stats.words?.length) q = `?g=${b64u(stats.words.join(','))}`
+  else if ((toy === 'smash' || toy === 'knock' || toy === 'stamp') && stats.words?.length) q = `?w=${encodeWords(stats.words)}`
   else if (toy === 'purr') q = catQuery(stats.name || '', stats.coat || '')
   else if (toy === 'squish') q = bunQuery(stats.name || '', stats.skin || '')
+  const base = `https://${toy}.integ.life/${q && GIFT_PAGE.includes(toy) ? 'g/' : ''}`
   if (method) q += `${q ? '&' : '?'}r=${method}${hopOut()}`
   return base + q
 }
@@ -270,16 +575,31 @@ export function shareText(toy: ToyId): string {
       if (!store.done || !p) return K.invite
       return fill(p.sticks === 1 ? K.done1 : K.done, { s: p.sticks, n: p.today })
     }
-    case 'smash':
-      return mine && words && n ? tx('share_smash_words', { w: words }) : tx('share_smash')
-    case 'scratch':
-      return mine && words ? tx('share_scratch_words') : n ? tx('share_scratch_stat', { n, k }) : tx('share_scratch')
+    case 'smash': {
+      const T = SMASH[locale]
+      if (mine && words) return fill(store.done ? T.done : T.invite, { w: words })
+      return store.done && n ? fill(T.done0, { n }) : tx('share_smash')
+    }
+    case 'scratch': {
+      const T = SCRATCH[locale]
+      const g = store.peak?.data.gift
+      if (mine && words) return T.done_gift
+      if (store.done && g && stats.words?.[g - 1]) return fill(T.done_claim, { w: stats.words[g - 1] })
+      return n && k ? fill(T.done_win, { n, k }) : n ? tx('share_scratch_stat', { n, k }) : tx('share_scratch')
+    }
     case 'stamp':
       return mine && words ? tx('share_stamp_words') : n ? tx('share_stamp_stat', { n, k }) : tx('share_stamp')
-    case 'purr':
-      return mine && stats.name ? tx('share_purr_name', { name: stats.name }) : tx('share_purr')
-    case 'squish':
-      return !n ? tx('share_squish') : mine && stats.name ? tx('share_squish_name', { name: stats.name, n }) : tx('share_squish_stat', { n })
+    case 'purr': {
+      const T = PURR[locale]
+      const p = store.peak?.data
+      if (store.done && p) return fill(stats.name ? T.done : T.done0, { name: stats.name || '', r: (p.rating_x10 ?? 0) / 10, t: p.traps ?? 0 })
+      return mine && stats.name ? tx('share_purr_name', { name: stats.name }) : T.invite
+    }
+    case 'squish': {
+      const T = SQUISH[locale]
+      if (store.done && n) return fill(stats.name ? T.done : T.done0, { name: stats.name || '', n })
+      return mine && stats.name ? fill(T.invite, { name: stats.name }) : tx('share_squish')
+    }
     case 'pour':
       return !n ? tx('share_pour') : stats.last === 'golden' ? tx('share_pour_golden', { n }) : tx('share_pour_stat', { n, k })
     default:
@@ -287,8 +607,21 @@ export function shareText(toy: ToyId): string {
   }
 }
 
-/** The label on the sheet's primary button: a recipient answers back. */
-export const primaryLabel = (toy: ToyId) => (landing.recipient ? (toy === 'knock' ? KNOCK[locale].reply : S.reply) : S.primary)
+/** The label on the sheet's primary button: a recipient answers back (scratch: claims the prize). */
+export function primaryLabel(toy: ToyId) {
+  if (!landing.recipient) return S.primary
+  if (toy === 'scratch' && store.peak?.data.gift) return SCRATCH[locale].primary
+  return toy === 'purr' ? PURR[locale].reply : S.reply
+}
+
+/** A recipient's answer: their own words / name, typed into the toy's box (live.reply). Empty when there is none. */
+export function replyLabel(toy: ToyId): string {
+  if (!landing.recipient || !live.reply || authored()) return ''
+  const T = { knock: KNOCK, smash: SMASH, squish: SQUISH, scratch: SCRATCH } as Partial<Record<ToyId, Record<Locale, { reply: string }>>>
+  return T[toy]?.[locale].reply ?? S.reply
+}
+/** On scratch the answer comes second (claiming the prize comes first); elsewhere it is the main button. */
+export const replyFirst = (toy: ToyId) => toy !== 'scratch'
 
 /** Numbers that ride along on share_done (never user text). */
 export const shareExtra = (toy: ToyId): Record<string, number> =>
@@ -306,7 +639,9 @@ export const shareExtra = (toy: ToyId): Record<string, number> =>
               ? { total: stats.n ?? 0, denied: stats.k ?? 0 }
               : toy === 'zip' && stats.n
                 ? { total: stats.n }
-                : {}
+                : toy === 'purr' && store.peak
+                  ? { traps: store.peak.data.traps ?? 0, rating_x10: store.peak.data.rating_x10 ?? 0 }
+                  : {}
 
 // ---------- the documents ----------
 
@@ -326,14 +661,51 @@ function knockDoc(p: Record<string, number> | null): Doc {
   return { look: look('knock'), title: K.title, seal: K.seal, rows: rows.slice(0, 4), focus: 0.5, verdict, small: K.small, call: S.call, host: 'knock.integ.life' }
 }
 
+const quote = (w: string) => (w.length > 14 ? w.slice(0, 13) + '…' : w)
+
+/** smash: the word on the card only when it was typed on this device (a recipient's card leaves it out). */
+function smashDoc(p: Record<string, number> | null): Doc {
+  const T = SMASH[locale]
+  const n = p?.panes ?? stats.n ?? 0
+  const rows: [string, string][] = []
+  const w = stats.words?.length && authored() ? stats.words[0] : ''
+  if (w) rows.push([T.cause[0], fill(T.cause[1], { w: quote(w) })])
+  if (n) rows.push(n === 1 ? [T.damage1[0], T.damage1[1]] : [T.damage[0], fill(T.damage[1], { n })])
+  rows.push([T.fault[0], T.fault[1]])
+  return { look: look('smash'), title: T.title, rows, focus: 0.5, verdict: T.verdict, small: T.small, call: S.call, host: 'smash.integ.life' }
+}
+
+function squishDoc(p: Record<string, number> | null): Doc {
+  const T = SQUISH[locale]
+  const v = { name: quote(stats.name || ''), n: p?.n ?? stats.n ?? 0, k: p?.k ?? stats.k ?? 0 }
+  return { look: look('squish'), title: T.title, rows: [], body: fill(stats.name ? T.body : T.body0, v), focus: 0.55, verdict: T.verdict, small: T.small, call: S.call, host: 'squish.integ.life' }
+}
+
+/** scratch: the sender's unscratched gift ticket, the recipient's 兑奖凭证, or an ordinary 中奖凭证. */
+function scratchDoc(p: Record<string, number> | null): Doc | null {
+  const T = SCRATCH[locale]
+  const base = { look: look('scratch'), focus: 0.5, contain: true, call: S.call, host: 'scratch.integ.life' }
+  if (stats.words?.length && authored()) return { ...base, title: T.gift, rows: [], snap: live.ticket?.() ?? null, verdict: T.gift_v, small: T.small }
+  const g = p?.gift && stats.words?.[p.gift - 1]
+  if (g) return { ...base, title: T.claim, rows: [[T.prize, quotes().join(quote(g))], [T.how, T.how_gift]], verdict: T.claim_v, small: T.small }
+  const id = p?.prize ? PRIZES[p.prize - 1] : undefined
+  if (id) return { ...base, title: T.win, rows: [[T.prize, quote(tx(`scratch_prize_${id}`))], [T.how, T[`how_${id}`]]], verdict: T.win_v, small: T.win_small }
+  return null
+}
+
+const quotes = () => (locale === 'zh-CN' || locale === 'ja' ? ['「', '」'] : locale === 'fr' ? ['« ', ' »'] : locale === 'es' ? ['«', '»'] : ['“', '”'])
+
 /** Every toy without its own document yet: its name and its current share line. */
 function defaultDoc(toy: ToyId): Doc {
   const line = strip(shareText(toy)).replace(/\s*[:：]\s*$/, '')
-  const q = locale === 'zh-CN' || locale === 'ja' ? ['「', '」'] : locale === 'fr' ? ['« ', ' »'] : locale === 'es' ? ['«', '»'] : ['“', '”']
+  const q = quotes()
   return { look: look(toy), title: tx(`name_${toy}`), rows: [], verdict: q[0] + line + q[1], small: '', call: S.call, host: `${toy}.integ.life` }
 }
 
 export function buildDoc(toy: ToyId, peak: Peak | null): Doc {
-  if (toy === 'knock') return knockDoc(peak?.data ?? live.data?.() ?? null)
-  return defaultDoc(toy)
+  const p = peak?.data ?? live.data?.() ?? null
+  if (toy === 'knock') return knockDoc(p)
+  if (toy === 'smash') return smashDoc(p)
+  if (toy === 'squish') return squishDoc(p)
+  return (toy === 'scratch' && scratchDoc(p)) || defaultDoc(toy)
 }

@@ -4,9 +4,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { createPortal } from 'react-dom'
 import { locale, type ToyId } from '../i18n'
-import { emit, store, trackShare, type Card, type Method, type ShareMethod } from '../share'
+import { emit, live, store, trackShare, type Card, type Method, type ShareMethod } from '../share'
 import { track } from '../analytics'
-import { S, fileName, primaryLabel, shareExtra, shareText, shareUrl } from '../cards'
+import { S, fileName, primaryLabel, replyFirst, replyLabel, shareExtra, shareText, shareUrl } from '../cards'
 import { IconClose } from './Icons'
 
 function closeSheet() {
@@ -40,17 +40,19 @@ const NET: { id: 'weibo' | 'x' | 'whatsapp'; label: string; href: (u: string, s:
 export default function ShareSheet({ toy }: { toy: ToyId }) {
   const from = store.sheet ?? 'button'
   const [m] = useState(mode)
-  const [card, setCard] = useState<Card | null>(store.peak ? store.card : null)
+  // a reply was just written: the card is drawn again with the recipient's own words
+  const fresh = !store.peak || !store.card || store.card.of !== store.peak || from === 'reply'
+  const [card, setCard] = useState<Card | null>(fresh ? null : store.card)
   const [jpeg, setJpeg] = useState('')
   const [full, setFull] = useState(false)
   const [copied, setCopied] = useState(false)
   const held = useRef<{ timer: number; sent: boolean }>({ timer: 0, sent: false })
 
   useEffect(() => {
-    track('share_open', { from, card: store.peak ? 1 : 0 })
+    track('share_open', { from, card: store.peak ? 1 : 0, ...shareExtra(toy) })
     // no peak yet (or nothing drawn): draw the toy's default document with today's numbers
     // (card.ts stays a chunk of its own: imported on demand here and at a peak)
-    if (!store.peak || !store.card) import('../card').then((c) => c.renderCard(toy)).then(setCard, () => {})
+    if (fresh) import('../card').then((c) => c.renderCard(toy)).then(setCard, () => {})
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && closeSheet()
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
@@ -133,6 +135,14 @@ export default function ShareSheet({ toy }: { toy: ToyId }) {
   }
   const holdEnd = () => window.clearTimeout(held.current.timer)
 
+  // a recipient answers with their own words: the toy's box opens, empty; the sheet comes back from it
+  const rep = replyLabel(toy)
+  const first = !!rep && replyFirst(toy)
+  const reply = () => {
+    closeSheet()
+    live.reply?.()
+  }
+
   const btn = 'flex min-h-[48px] w-full items-center justify-center rounded-2xl px-4 text-[15px] font-semibold active:scale-[0.98] disabled:opacity-40'
   const primary = `${btn} bg-white text-black`
   const secondary = `${btn} bg-white/12 text-white`
@@ -181,11 +191,18 @@ export default function ShareSheet({ toy }: { toy: ToyId }) {
         </div>
         {picture}
         <div className="mt-4 flex flex-col gap-2">
+          {first && (
+            <button type="button" className={primary} onClick={reply}>
+              {rep}
+            </button>
+          )}
           {m === 'phone' && (
             <>
-              <button type="button" className={primary} disabled={!card} onClick={canFiles ? sendFile : sendLink}>
-                {primaryLabel(toy)}
-              </button>
+              {!first && (
+                <button type="button" className={primary} disabled={!card} onClick={canFiles ? sendFile : sendLink}>
+                  {primaryLabel(toy)}
+                </button>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <button type="button" className={secondary} onClick={sendLink}>
                   {S.link}
@@ -208,7 +225,7 @@ export default function ShareSheet({ toy }: { toy: ToyId }) {
           {m === 'desktop' && (
             <>
               {typeof ClipboardItem !== 'undefined' && (
-                <button type="button" className={primary} disabled={!card} onClick={copyImage}>
+                <button type="button" className={first ? secondary : primary} disabled={!card} onClick={copyImage}>
                   {S.copy_image}
                 </button>
               )}
@@ -236,6 +253,11 @@ export default function ShareSheet({ toy }: { toy: ToyId }) {
                 ))}
               </div>
             </>
+          )}
+          {rep && !first && (
+            <button type="button" className={secondary} onClick={reply}>
+              {rep}
+            </button>
           )}
         </div>
       </div>

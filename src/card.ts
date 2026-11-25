@@ -18,7 +18,7 @@ const SERIF = locale === 'ja' ? '"Hiragino Mincho ProN", "Noto Serif CJK JP", se
 const MONO = 'ui-monospace, "SF Mono", Menlo, Consolas, "PingFang SC", "Noto Sans SC", monospace'
 
 /** A copy of the page's canvas for the default card; null when it reads back blank (WebGL). */
-function pageSnap(): HTMLCanvasElement | null {
+export function pageSnap(): HTMLCanvasElement | null {
   try {
     const own = live.snap?.()
     if (own) return own
@@ -74,7 +74,7 @@ function wrap(c: CanvasRenderingContext2D, text: string, max: number, lines: num
   return out
 }
 
-function drawSurface(c: CanvasRenderingContext2D, d: Doc) {
+function drawSurface(c: CanvasRenderingContext2D, d: Doc, W = 1080, H = 1350) {
   const g = c.createLinearGradient(0, 0, 0, H)
   g.addColorStop(0, d.look.surface[0])
   g.addColorStop(1, d.look.surface[1])
@@ -94,7 +94,7 @@ function drawSurface(c: CanvasRenderingContext2D, d: Doc) {
   }
 }
 
-function drawQr(c: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, ink: string) {
+export function drawQr(c: CanvasRenderingContext2D, text: string, x: number, y: number, size: number, ink: string) {
   const qr = qrcode(0, 'M')
   qr.addData(text, 'Byte')
   qr.make()
@@ -113,7 +113,138 @@ const stamp = () => {
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
 }
 
-/** Draw the document. Exported for the og-image script (1200 x 630 layout comes in WP2). */
+/** The picture, cover-fit (or whole, `contain`) into a rounded window with a thin rule. */
+function drawSnap(c: CanvasRenderingContext2D, d: Doc, snap: HTMLCanvasElement, x: number, y: number, w: number, h: number) {
+  c.save()
+  const clip = new Path2D()
+  clip.roundRect(x, y, w, h, 16)
+  c.clip(clip)
+  c.fillStyle = d.look.surface[0]
+  c.fillRect(x, y, w, h)
+  const k = (d.contain ? Math.min : Math.max)(w / snap.width, h / snap.height) * (d.contain ? 0.94 : 1)
+  const sw = snap.width * k
+  const sh = snap.height * k
+  const fy = d.focus ?? 0.5
+  c.drawImage(snap, x + (w - sw) / 2, y + (d.contain ? (h - sh) / 2 : Math.min(0, Math.max(h - sh, h / 2 - sh * fy))), sw, sh)
+  c.restore()
+  c.strokeStyle = d.look.accent2
+  c.lineWidth = 2
+  c.beginPath()
+  c.roundRect(x, y, w, h, 16)
+  c.stroke()
+}
+
+/**
+ * The link preview (1200 x 630), drawn by the og-image script from the same documents: the paper lies
+ * on the toy's surface, the picture on the left, title, rows (or the note), verdict and address on the right.
+ */
+export function drawOg(d: Doc, snap: HTMLCanvasElement | null): HTMLCanvasElement {
+  const OW = 1200
+  const OH = 630
+  const cv = document.createElement('canvas')
+  cv.width = OW
+  cv.height = OH
+  const c = cv.getContext('2d')!
+  drawSurface(c, d, OW, OH)
+  const pw = 1100
+  const ph = 540
+  c.save()
+  c.translate(OW / 2, OH / 2)
+  c.rotate(-0.012)
+  c.translate(-pw / 2, -ph / 2)
+  c.shadowColor = 'rgba(0,0,0,0.45)'
+  c.shadowBlur = 36
+  c.shadowOffsetY = 12
+  c.fillStyle = d.look.paper
+  c.fillRect(0, 0, pw, ph)
+  c.shadowColor = 'transparent'
+  c.strokeStyle = d.look.accent
+  c.lineWidth = 6
+  c.strokeRect(16, 16, pw - 32, ph - 32)
+  c.strokeStyle = d.look.accent2
+  c.lineWidth = 2
+  c.strokeRect(27, 27, pw - 54, ph - 54)
+  const pad = 46
+  const sw = snap ? 500 : 0
+  if (snap) drawSnap(c, d, snap, pad, pad, sw, ph - pad * 2)
+  const x0 = pad + sw + (snap ? 44 : 0)
+  const cw = pw - pad - x0
+  const cx = x0 + cw / 2
+  c.textAlign = 'center'
+  c.textBaseline = 'alphabetic'
+  c.fillStyle = d.look.accent
+  fit(c, d.title, '800', 60, SANS, cw - (d.seal ? 110 : 0), 30)
+  // a title and a line only (the gift previews): the block sits in the middle
+  let y = d.rows.length || d.body ? pad + 86 : ph / 2 - 50
+  c.fillText(d.title, cx, y)
+  if (d.seal) {
+    c.save()
+    c.translate(x0 + cw - 40, y - 22)
+    c.rotate(0.18)
+    c.strokeStyle = d.look.accent
+    c.globalAlpha = 0.85
+    c.lineWidth = 4
+    c.beginPath()
+    c.arc(0, 0, 38, 0, Math.PI * 2)
+    c.stroke()
+    c.fillStyle = d.look.accent
+    fit(c, d.seal, '800', 24, SANS, 60, 12)
+    c.textBaseline = 'middle'
+    c.fillText(d.seal, 0, 1)
+    c.restore()
+    c.textBaseline = 'alphabetic'
+  }
+  const rule = () => {
+    c.strokeStyle = d.look.faint
+    c.setLineDash([8, 8])
+    c.lineWidth = 2
+    c.beginPath()
+    c.moveTo(x0, y)
+    c.lineTo(x0 + cw, y)
+    c.stroke()
+    c.setLineDash([])
+  }
+  if (d.rows.length || d.body) {
+    y += 34
+    rule()
+    if (d.body) {
+      c.fillStyle = d.look.ink
+      c.font = `500 29px ${SERIF}`
+      for (const line of wrap(c, d.body, cw - 10, 4)) c.fillText(line, cx, (y += 42))
+    }
+    for (const [label, value] of d.rows.slice(0, 4)) {
+      y += 50
+      c.textAlign = 'left'
+      c.fillStyle = d.look.ink
+      fit(c, label, '600', 32, SANS, cw * 0.5, 20)
+      const lw = c.measureText(label).width
+      c.fillText(label, x0, y)
+      c.textAlign = 'right'
+      fit(c, value, '700', 32, MONO, cw - lw - 40, 18)
+      const vw = c.measureText(value).width
+      c.fillText(value, x0 + cw, y)
+      c.fillStyle = d.look.faint
+      for (let x = x0 + lw + 12; x < x0 + cw - vw - 10; x += 12) c.fillRect(x, y - 5, 3, 3)
+    }
+    y += 30
+    rule()
+    c.textAlign = 'center'
+  }
+  c.fillStyle = d.look.accent
+  // one line if it fits at 32 px or more, else two
+  if (fit(c, d.verdict, 'italic 700', 42, SERIF, cw - 10, 32) > 32 || c.measureText(d.verdict).width <= cw - 10) c.fillText(d.verdict, cx, (y += 62))
+  else {
+    c.font = `italic 700 40px ${SERIF}`
+    for (const line of wrap(c, d.verdict, cw - 10, 2)) c.fillText(line, cx, (y += 58))
+  }
+  c.fillStyle = d.look.faint
+  fit(c, d.host, '600', 30, MONO, cw, 18)
+  c.fillText(d.host, cx, ph - pad - 6)
+  c.restore()
+  return cv
+}
+
+/** Draw the share card (1080 x 1350). */
 export function drawCard(d: Doc, snap: HTMLCanvasElement | null, qrText: string): HTMLCanvasElement {
   const cv = document.createElement('canvas')
   cv.width = W
@@ -147,33 +278,18 @@ export function drawCard(d: Doc, snap: HTMLCanvasElement | null, qrText: string)
   const ROW = 58
   const QS = 200
   const TOP = 58
-  const rowsH = d.rows.length ? 74 + d.rows.length * ROW : 0
+  c.font = `500 40px ${SERIF}`
+  const body = d.body ? wrap(c, d.body, inner - 20, 5) : []
+  const rowsH = d.rows.length ? 74 + d.rows.length * ROW : body.length ? 74 + body.length * 56 : 0
   c.font = `italic 700 50px ${SERIF}`
   const verdict = wrap(c, d.verdict, inner - 20, 2)
   const blockH = 84 + 40 + rowsH + 20 + verdict.length * 64
   const textH = blockH + 40 + QS + TOP
   let y = TOP
   // a document without rows (the default card) lets the picture take the room
-  const snapH = snap ? Math.max(260, Math.min(d.rows.length ? 600 : 820, ph - TOP - textH)) : 0
+  const snapH = snap ? Math.max(260, Math.min(d.rows.length || body.length ? 600 : 820, ph - TOP - textH)) : 0
   if (snap) {
-    c.save()
-    const clip = new Path2D()
-    clip.roundRect(pad, y, inner, snapH, 16)
-    c.clip(clip)
-    c.fillStyle = d.look.surface[0]
-    c.fillRect(pad, y, inner, snapH)
-    // cover-fit around the document's focus point (knock: the floating text and the fish's face)
-    const k = Math.max(inner / snap.width, snapH / snap.height)
-    const sw = snap.width * k
-    const sh = snap.height * k
-    const fy = d.focus ?? 0.5
-    c.drawImage(snap, pad + (inner - sw) / 2, y + Math.min(0, Math.max(snapH - sh, snapH / 2 - sh * fy)), sw, sh)
-    c.restore()
-    c.strokeStyle = d.look.accent2
-    c.lineWidth = 2
-    c.beginPath()
-    c.roundRect(pad, y, inner, snapH, 16)
-    c.stroke()
+    drawSnap(c, d, snap, pad, y, inner, snapH)
     y += snapH + 84
   } else y += Math.max(60, (ph - TOP - textH) / 2) + 84 // no picture (a WebGL toy reads back blank): centre the text
 
@@ -205,8 +321,8 @@ export function drawCard(d: Doc, snap: HTMLCanvasElement | null, qrText: string)
   c.font = `400 24px ${MONO}`
   c.fillText(stamp(), pw / 2, y)
 
-  // rows: label, dotted leader, value
-  if (d.rows.length) {
+  // rows: label, dotted leader, value (or the note's paragraph)
+  if (d.rows.length || body.length) {
     y += 24
     c.strokeStyle = d.look.faint
     c.setLineDash([8, 8])
@@ -217,6 +333,13 @@ export function drawCard(d: Doc, snap: HTMLCanvasElement | null, qrText: string)
     c.stroke()
     c.setLineDash([])
     y += 14
+    c.textAlign = 'center'
+    c.fillStyle = d.look.ink
+    c.font = `500 40px ${SERIF}`
+    for (const line of body) {
+      y += 56
+      c.fillText(line, pw / 2, y)
+    }
     for (const [label, value] of d.rows) {
       y += ROW
       c.textAlign = 'left'
@@ -274,9 +397,9 @@ export function drawCard(d: Doc, snap: HTMLCanvasElement | null, qrText: string)
 
 export async function makeCard(toy: ToyId, peak: Peak | null): Promise<Card> {
   const d = buildDoc(toy, peak)
-  const cv = drawCard(d, peak?.snap ?? pageSnap(), shareUrl(toy, 'q'))
+  const cv = peak?.card ?? drawCard(d, d.snap !== undefined ? d.snap : (peak?.snap ?? pageSnap()), shareUrl(toy, 'q'))
   const blob = await new Promise<Blob>((ok, no) => cv.toBlob((b) => (b ? ok(b) : no(new Error('toBlob'))), 'image/png'))
-  return { blob, url: URL.createObjectURL(blob), canvas: cv, peak: peak ? 1 : 0 }
+  return { blob, url: URL.createObjectURL(blob), canvas: cv, peak: peak ? 1 : 0, of: peak }
 }
 
 /** Render (or re-render) the card; resolves when the image exists. */
