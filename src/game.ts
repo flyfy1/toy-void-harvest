@@ -25,7 +25,7 @@ interface Item {
   pa: number // polar angle while captured
 }
 
-export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () => void {
+export function startGame(canvas: HTMLCanvasElement, onFirst: () => void, hud?: HTMLElement | null): () => void {
   let resized = false
   const { stage, dispose } = setupCanvas(canvas, () => (resized = true))
   const shake = new Shake(22, 0.03, 1.8)
@@ -48,6 +48,7 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
   let lastEat = -1
   let lastNote = -1
   let time = 0
+  let hudLine = ''
 
   const spawnWave = () => {
     const { w, h } = stage
@@ -174,7 +175,7 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
   const clear = () => {
     const t = waveTime
     stop.trigger(55)
-    flash.fire(0.75, '220,200,255')
+    flash.fire(0.3, '220,200,255')
     shake.add(0.65)
     haptic([30, 20, 80])
     audio.chord([pentaFreq(5, 262), pentaFreq(7, 262), pentaFreq(8, 262), pentaFreq(10, 262), pentaFreq(12, 262)], 1.5, 0.12, 0.04)
@@ -338,11 +339,9 @@ export function startGame(canvas: HTMLCanvasElement, onFirst: () => void): () =>
     parts.draw(ctx)
     ctx.restore()
 
-    // HUD
-    ctx.font = '600 13px ui-monospace, monospace'
-    ctx.textAlign = 'center'
-    ctx.fillStyle = 'rgba(255,255,255,0.45)'
-    ctx.fillText(`WAVE ${wave}  ·  ${alive} LEFT  ·  ${waveTime.toFixed(1)}s`, w / 2, 24)
+    // HUD: a DOM pill, written only when the text changes
+    const line = `${alive} · ${waveTime.toFixed(1)}s`
+    if (hud && line !== hudLine) hud.textContent = hudLine = line
 
     if (banner.t > 0) {
       const m = Math.min(w, h)
