@@ -141,8 +141,7 @@ export const list = (key: ListKey): readonly string[] => M[key] as readonly stri
 export function applyMeta(toy: ToyId) {
   document.documentElement.lang = locale
   const name = tx(`name_${toy}`)
-  const enName = ((en as Record<string, string>)[`name_${toy}`] ?? (TOY.en as Record<string, unknown>)[`name_${toy}`]) as string
-  document.title = locale === 'en' ? `${name} · integ.life` : `${name} · ${enName}`
+  document.title = locale === 'en' ? `${name} · integ.life` : `${name} · ${({ ...en, ...TOY.en } as Record<string, unknown>)[`name_${toy}`]}`
   document.querySelector('meta[name="description"]')?.setAttribute('content', tx(`desc_${toy}`))
   const local = document.getElementById('about-local')
   if (local && locale !== 'en') {

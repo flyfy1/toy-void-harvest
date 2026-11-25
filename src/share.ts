@@ -228,12 +228,9 @@ export const live: { snap: (() => HTMLCanvasElement | null) | null; data: (() =>
 
 /** Is a finger (or button) down right now? The slip never appears under a finger. */
 export const pointer = { down: false }
-if (typeof window !== 'undefined') {
-  window.addEventListener('pointerdown', () => (pointer.down = true), true)
-  const up = () => (pointer.down = false)
-  window.addEventListener('pointerup', up, true)
-  window.addEventListener('pointercancel', up, true)
-}
+addEventListener('pointerdown', () => (pointer.down = true), true)
+addEventListener('pointerup', () => (pointer.down = false), true)
+addEventListener('pointercancel', () => (pointer.down = false), true)
 
 /**
  * The game's peak. Called with a snapshot taken in the peak frame and numbers only. The slip shows no
