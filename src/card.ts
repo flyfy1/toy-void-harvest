@@ -153,7 +153,8 @@ export function drawCard(d: Doc, snap: HTMLCanvasElement | null, qrText: string)
   const blockH = 84 + 40 + rowsH + 20 + verdict.length * 64
   const textH = blockH + 40 + QS + TOP
   let y = TOP
-  const snapH = snap ? Math.max(260, Math.min(600, ph - TOP - textH)) : 0
+  // a document without rows (the default card) lets the picture take the room
+  const snapH = snap ? Math.max(260, Math.min(d.rows.length ? 600 : 820, ph - TOP - textH)) : 0
   if (snap) {
     c.save()
     const clip = new Path2D()
