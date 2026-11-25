@@ -134,6 +134,11 @@ export function tx(key: string, vars: Record<string, string | number> = {}): str
   return typeof v === 'string' ? fill(v, vars) : ''
 }
 
+/** Text a toy loads after boot (scratch's prize pool, one file per language): merged into the table `t` and `tx` read. */
+export function addStrings(more: Record<string, string>) {
+  Object.assign(M, more)
+}
+
 /** A list of lines (smash's default words, knock's variants, charge's pfft lines …). */
 export const list = (key: ListKey): readonly string[] => M[key] as readonly string[]
 

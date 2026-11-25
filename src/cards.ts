@@ -474,8 +474,8 @@ const SCRATCH = {
     reply: 'お返しに一枚置く',
   },
 } satisfies Record<Locale, Record<string, string>>
-/** the built-in prizes, in the order the game numbers them for the card (data.prize) */
-export const PRIZES = ['slack', 'coffee', 'nap', 'cat', 'merit', 'dayoff'] as const
+/** the built-in prizes, in the order the game numbers them for the card (data.prize): append-only, scratch's prizes.ts has the same list */
+export const PRIZES = 'slack coffee nap cat merit dayoff paid_break skip_meeting last_snack early_night cat_cover not_your_fault lunch_hour no_overtime left_on_read bubble_wrap monday_fuel boss_lunch squishy free_card cat_email void_pass empty_promise glass friday_mode long_weekend raise coffee_for_life early_retirement cat_promotion annual_leave million_merit'.split(' ')
 
 /** charge: 血压单 / Blood Pressure Reading. */
 const CHARGE = {
@@ -996,10 +996,20 @@ function scratchDoc(p: Record<string, number> | null): Doc | null {
   const base = { look: look('scratch'), focus: 0.5, contain: true, call: S.call, host: 'scratch.integ.life' }
   if (stats.words?.length && authored()) return { ...base, call: T.call_gift, title: T.gift, rows: [], snap: live.ticket?.() ?? null, verdict: T.gift_v, small: T.small }
   const g = p?.gift && stats.words?.[p.gift - 1]
-  if (g) return { ...base, title: T.claim, rows: [[T.prize, quotes().join(quote(g))], [T.how, T.how_gift]], verdict: T.claim_v, small: T.small }
+  // gl: which of the claim lines (2 to 4 are the toy's own text, loaded with its prize pool)
+  if (g) return { ...base, title: T.claim, rows: [[T.prize, quotes().join(quote(g))], [T.how, tx(`scratch_how_gift_${p.gl}`) || T.how_gift]], verdict: T.claim_v, small: T.small }
+  // the prize pool (text and claim lines from the toy's own strings); v the timed line, r 2 rare, 3 jackpot
   const id = p?.prize ? PRIZES[p.prize - 1] : undefined
-  if (id) return { ...base, title: T.win, rows: [[T.prize, quote(tx(`scratch_prize_${id}`))], [T.how, T[`how_${id}`]]], verdict: T.win_v, small: T.win_small }
-  return null
+  if (!id || !p) return null
+  const v = p.v ? '_alt' : ''
+  const prize = tx(`scratch_prize_${id}${v}`) || tx(`scratch_prize_${id}`)
+  const how = tx(`scratch_how_${id}${v}`) || (T as Record<string, string>)[`how_${id}`] || tx(`scratch_how_${id}`)
+  const verdict = (p.r === 3 && tx('scratch_win_v_jackpot')) || (p.r === 2 && tx('scratch_win_v_rare')) || T.win_v
+  const small = (p.r === 3 && tx('scratch_win_small_jackpot')) || T.win_small
+  // the built-in line is the toy's own (at most 52 characters, it fits the row): not shortened like a friend's words
+  const rows: [string, string][] = [[T.prize, prize]]
+  if (how) rows.push([T.how, how])
+  return { ...base, title: T.win, rows, verdict, small }
 }
 
 
