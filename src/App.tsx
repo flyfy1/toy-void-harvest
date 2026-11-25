@@ -9,6 +9,7 @@ const COARSE = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse
 
 export default function App() {
   const ref = useRef<HTMLCanvasElement>(null)
+  const over = useRef<HTMLCanvasElement>(null)
   const hud = useRef<HTMLDivElement>(null)
   const [touched, setTouched] = useState(false)
   useEffect(() => {
@@ -16,6 +17,7 @@ export default function App() {
     startAnalytics('void')
     return startGame(
       ref.current!,
+      over.current!,
       () => {
         setTouched(true)
         track('play_start')
@@ -26,6 +28,7 @@ export default function App() {
   return (
     <>
       <canvas ref={ref} />
+      <canvas ref={over} className="pointer-events-none fixed inset-0" />
       <div
         ref={hud}
         className="pointer-events-none fixed left-1/2 top-3 z-10 -translate-x-1/2 rounded-full bg-black/45 px-3 py-1 font-[system-ui] text-xs font-semibold tabular-nums text-white/70 backdrop-blur select-none"

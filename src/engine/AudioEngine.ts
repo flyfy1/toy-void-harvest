@@ -250,6 +250,77 @@ class AudioEngine {
       },
     }
   }
+
+  /** void only: the hole burps back a lost thing. Sawtooth 70 -> 110 -> 60 Hz through a lowpass plus a 700 Hz formant. */
+  burp(): void {
+    if (!this.ok) return
+    const ctx = this.ctx!
+    const t0 = ctx.currentTime
+    const o = ctx.createOscillator()
+    o.type = 'sawtooth'
+    o.frequency.setValueAtTime(70, t0)
+    o.frequency.linearRampToValueAtTime(110, t0 + 0.08)
+    o.frequency.exponentialRampToValueAtTime(60, t0 + 0.28)
+    const lp = ctx.createBiquadFilter()
+    lp.type = 'lowpass'
+    lp.frequency.value = 500
+    const bp = ctx.createBiquadFilter()
+    bp.type = 'bandpass'
+    bp.frequency.value = 700
+    bp.Q.value = 4
+    const g = ctx.createGain()
+    g.gain.setValueAtTime(0.0001, t0)
+    g.gain.exponentialRampToValueAtTime(0.3, t0 + 0.02)
+    g.gain.setValueAtTime(0.3, t0 + 0.2)
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.3)
+    const f = ctx.createGain()
+    f.gain.value = 0.8
+    o.connect(lp).connect(g)
+    lp.connect(bp).connect(f).connect(g)
+    g.connect(this.master!)
+    o.start(t0)
+    o.stop(t0 + 0.32)
+  }
+
+  /** void only: a low hum while the hole is feeding. set(p) with p in [0,1]. */
+  hum(): Riser {
+    if (!this.ok) return { set() {}, stop() {} }
+    const ctx = this.ctx!
+    const t0 = ctx.currentTime
+    const out = ctx.createGain()
+    out.gain.setValueAtTime(0.0001, t0)
+    const o = ctx.createOscillator()
+    o.frequency.value = 48
+    const o2 = ctx.createOscillator()
+    o2.frequency.value = 96.4
+    const g2 = ctx.createGain()
+    g2.gain.value = 0.25
+    o.connect(out)
+    o2.connect(g2).connect(out)
+    out.connect(this.master!)
+    const set = (p: number) => {
+      const t = ctx.currentTime
+      o.frequency.setTargetAtTime(48 + 16 * p, t, 0.08)
+      o2.frequency.setTargetAtTime((48 + 16 * p) * 2.008, t, 0.08)
+      out.gain.setTargetAtTime(0.05 + 0.04 * p, t, 0.08)
+    }
+    set(0)
+    o.start()
+    o2.start()
+    let stopped = false
+    return {
+      set,
+      stop() {
+        if (stopped) return
+        stopped = true
+        const t = ctx.currentTime
+        out.gain.cancelScheduledValues(t)
+        out.gain.setTargetAtTime(0.0001, t, 0.06)
+        o.stop(t + 0.5)
+        o2.stop(t + 0.5)
+      },
+    }
+  }
 }
 
 export const audio = new AudioEngine()
