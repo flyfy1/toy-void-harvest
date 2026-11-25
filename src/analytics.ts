@@ -14,6 +14,7 @@ const TITLES: Record<ToyId, string> = {
   pop: 'Toy · Chain Pop',
   knock: 'Toy · Knock on Wood',
   purr: 'Toy · Lap Cat',
+  squish: 'Toy · Squishy Bun',
 }
 
 type W = Window & { dataLayer?: unknown[] }

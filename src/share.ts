@@ -2,7 +2,7 @@
 import { t, type ToyId } from './i18n'
 
 /** Best moment of this visit, written by the game, read when sharing. */
-export const stats: { n?: number; words?: string[]; name?: string; coat?: string } = {}
+export const stats: { n?: number; words?: string[]; name?: string; coat?: string; skin?: string } = {}
 
 // ---------- smash / knock: custom words travel in the URL (?w=BUG,加班,老板) ----------
 
@@ -68,12 +68,42 @@ export function syncCatToUrl(name: string, coat: string) {
   history.replaceState(null, '', url.toString())
 }
 
+// ---------- squish: the bun's name and skin travel in the URL (?n=Boss&s=baozi) ----------
+
+export const SKINS = ['mochi', 'baozi', 'tangyuan', 'paw'] as const
+export type Skin = (typeof SKINS)[number]
+export const parseSkin = (raw: string | null | undefined): Skin => (SKINS as readonly string[]).includes(raw || '') ? (raw as Skin) : 'mochi'
+
+export function bunFromUrl(): { name: string; skin: Skin } {
+  try {
+    const q = new URLSearchParams(location.search)
+    return { name: parseName(q.get('n')), skin: parseSkin(q.get('s')) }
+  } catch {
+    return { name: '', skin: 'mochi' }
+  }
+}
+
+const bunQuery = (name: string, skin: string) => {
+  const q: string[] = []
+  if (name) q.push(`n=${encodeURIComponent(name)}`)
+  if (skin && skin !== 'mochi') q.push(`s=${skin}`)
+  return q.length ? `?${q.join('&')}` : ''
+}
+
+/** Keep ?n=&s= in the address bar in sync (other query params are dropped). */
+export function syncBunToUrl(name: string, skin: string) {
+  const url = new URL(location.href)
+  url.search = bunQuery(name, skin)
+  history.replaceState(null, '', url.toString())
+}
+
 // ---------- payload ----------
 
 export function shareUrl(toy: ToyId): string {
   const base = `https://${toy}.integ.life/`
   if ((toy === 'smash' || toy === 'knock') && stats.words?.length) return `${base}?w=${encodeWords(stats.words)}`
   if (toy === 'purr') return base + catQuery(stats.name || '', stats.coat || '')
+  if (toy === 'squish') return base + bunQuery(stats.name || '', stats.skin || '')
   return base
 }
 
@@ -81,6 +111,7 @@ export function shareText(toy: ToyId): string {
   if (toy === 'smash' && stats.words?.length) return t('share_smash_words', { w: stats.words.join(', ') })
   if (toy === 'knock' && stats.words?.length) return t('share_knock_words', { w: stats.words.join(', ') })
   if (toy === 'purr' && stats.name) return t('share_purr_name', { name: stats.name })
+  if (toy === 'squish' && stats.name) return t('share_squish_name', { name: stats.name, n: stats.n || 0 })
   if (toy !== 'smash' && stats.n) return t(`share_${toy}_stat`, { n: stats.n })
   return t(`share_${toy}`)
 }

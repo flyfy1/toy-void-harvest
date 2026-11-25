@@ -16,8 +16,9 @@ async function qrDataUrl(text: string): Promise<string> {
   return qr.createDataURL(6, 2)
 }
 
-/** knock: the lifetime count rides along on the share event (a number, never user text). */
-const shareExtra = (toy: ToyId): Record<string, number> => (toy === 'knock' && stats.n ? { total: stats.n } : {})
+/** knock / squish: the count rides along on the share event (a number, never user text). */
+const shareExtra = (toy: ToyId): Record<string, number> =>
+  toy === 'knock' && stats.n ? { total: stats.n } : toy === 'squish' && stats.n ? { squeezes: stats.n } : {}
 
 export function ShareButton({ toy }: { toy: ToyId }) {
   const [open, setOpen] = useState(false)
