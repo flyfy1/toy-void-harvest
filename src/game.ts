@@ -3,7 +3,7 @@ import { track } from './analytics'
 import { stats } from './share'
 import { HitStop, Shake, clamp, easeOutBack, haptic, runLoop } from './engine/juice'
 import { Renderer } from './gl'
-import { K, MESS, RETURNS, bakeAtlas, cellUV, type ReturnId } from './clutter'
+import { ATLAS, K, MESS, RETURNS, bakeAtlas, cellUV, type ReturnId } from './clutter'
 import { bakeSky, rng } from './sky'
 import { FONT, vt } from './voidStrings'
 
@@ -25,6 +25,7 @@ interface Item {
   pa: number // polar angle while captured
   vr: number // radial speed while captured (for the noodle's pitch)
   ret: ReturnId | null // a returned item (the burp)
+  land: number // time it came to rest (returned items), -1 before
 }
 
 interface Spark {
@@ -40,6 +41,10 @@ interface Spark {
   b: number
 }
 
+const CX = [-1, 1, 1, -1]
+const CY = [-1, -1, 1, 1]
+const CU = [0, 2, 2, 0]
+const CV = [1, 1, 3, 3]
 const UV = Array.from({ length: K.Count }, (_, k) => cellUV(k))
 const DOT_UV = UV[K.Dot]
 const WHITE_UV = (() => {
@@ -56,8 +61,56 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   const rnd = q.has('seed') ? rng(seed) : Math.random
   const rr = (a: number, b: number) => a + rnd() * (b - a)
 
-  const gl = new Renderer(canvas)
-  gl.setAtlas(bakeAtlas())
+  // WebGL when we can get it; a plain Canvas 2D picture (no lensing) when we cannot, or while the context is lost
+  const atlas = bakeAtlas()
+  let sky: HTMLCanvasElement | null = null
+  let gl: Renderer | null = null
+  let fb: HTMLCanvasElement | null = null
+  let fctx: CanvasRenderingContext2D | null = null
+  const startGL = () => {
+    if (DEV && q.has('nogl')) return false
+    try {
+      const r = new Renderer(canvas)
+      r.setAtlas(atlas)
+      r.resize(stage.w, stage.h, stage.dpr)
+      if (sky) r.setBackground(sky)
+      r.warm()
+      gl = r
+      if (fb) fb.style.display = 'none'
+      return true
+    } catch {
+      gl = null
+      return false
+    }
+  }
+  const sizeFallback = () => {
+    if (!fb) return
+    fb.width = Math.round(stage.w * stage.dpr)
+    fb.height = Math.round(stage.h * stage.dpr)
+    fb.style.width = stage.w + 'px'
+    fb.style.height = stage.h + 'px'
+  }
+  const useFallback = () => {
+    gl = null
+    if (!fb) {
+      // a sibling canvas on top of the GL one; it lets pointer events through to the GL canvas
+      fb = document.createElement('canvas')
+      fb.className = 'pointer-events-none fixed inset-0'
+      canvas.after(fb)
+      fctx = fb.getContext('2d', { alpha: false })
+      sizeFallback()
+    }
+    fb.style.display = ''
+  }
+  const onLost = (e: Event) => {
+    e.preventDefault()
+    useFallback()
+  }
+  const onRestored = () => {
+    if (!startGL()) useFallback()
+  }
+  canvas.addEventListener('webglcontextlost', onLost)
+  canvas.addEventListener('webglcontextrestored', onRestored)
   const octx = overlay.getContext('2d')!
   const stage = { w: 0, h: 0, dpr: 1 }
   let resized = false
@@ -66,8 +119,12 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     stage.w = window.innerWidth
     stage.h = window.innerHeight
     stage.dpr = dpr
-    gl.resize(stage.w, stage.h, dpr)
-    gl.setBackground(bakeSky(stage.w, stage.h, dpr, seed))
+    sky = bakeSky(stage.w, stage.h, dpr, seed)
+    if (gl) {
+      gl.resize(stage.w, stage.h, dpr)
+      gl.setBackground(sky)
+    }
+    sizeFallback()
     overlay.width = Math.round(stage.w * dpr)
     overlay.height = Math.round(stage.h * dpr)
     overlay.style.width = stage.w + 'px'
@@ -77,6 +134,10 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   }
   let overlayDirty = true
   resize()
+  if (!startGL()) useFallback()
+  // the AudioContext costs ~100 ms to create; do it while idle, not on the first touch
+  const idle = (window as unknown as { requestIdleCallback?: (f: () => void) => number }).requestIdleCallback ?? ((f: () => void) => setTimeout(f, 300))
+  idle(() => audio.prewarm())
   window.addEventListener('resize', resize)
   const noMenu = (e: Event) => e.preventDefault()
   canvas.addEventListener('contextmenu', noMenu)
@@ -87,7 +148,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   let flashC = [1, 1, 1]
 
   let items: Item[] = []
-  let sparks: Spark[] = []
+  const sparks: Spark[] = []
   let alive = 0
   let wave = 0
   let waveTime = 0
@@ -110,6 +171,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   let time = 0
   let hudLine = ''
   let hum: Riser | null = null
+  let touchHeld = false
 
   // the burp
   const forced = DEV ? (q.get('item') as ReturnId | null) : null
@@ -174,6 +236,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     pa: 0,
     vr: 0,
     ret: null,
+    land: -1,
   })
 
   const press = (x: number, y: number, mouse: boolean) => {
@@ -184,7 +247,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     }
     hole.tx = x
     hole.ty = y
-    if (!mouse) hum = hum ?? audio.hum()
+    touchHeld = !mouse
     hole.active = true
   }
   const onDown = (e: PointerEvent) => {
@@ -198,6 +261,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   }
   const release = () => {
     hole.active = false
+    touchHeld = false
     hum?.stop()
     hum = null
   }
@@ -271,13 +335,14 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     stats.n = Math.min(stats.n ?? Infinity, Number(t.toFixed(2)))
   }
 
-  const ejectDist = () => Math.max(173, hole.vr * 2.3 + clamp(m0() * 0.16, 64, 88) * 0.7)
+  const retSize = () => clamp(m0() * 0.16, 64, 88) * 1.6
+  const ejectDist = () => Math.max(173, hole.vr * 2.3 + retSize() * 0.7)
   /** Where the returned item flies: up and away from the nearest edge, resting clear of the HUD and pills. */
   const ejectDir = () => {
     const { w, h } = stage
     // about 160 px clear of a small hole; further out when the hole is big
     const dist = ejectDist()
-    const size = clamp(m0() * 0.16, 64, 88)
+    const size = retSize()
     const top = 56 + size * 0.6 + 46 // HUD plus two caption lines
     const bottom = h - 96 - size * 0.6 - 46 // pills plus two caption lines
     let best = -Math.PI / 2
@@ -315,6 +380,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     hole.pulse = Math.max(0, hole.pulse - dt * 6)
     hole.heat = Math.max(0, hole.heat - dt * 0.9)
     hole.disk += dt * (1 + Math.min(2.5, step * 0.12) + hole.heat)
+    if (touchHeld && !hum && audio.ctx?.state === 'running') hum = audio.hum()
     hum?.set(clamp(step / 30, 0, 1))
     // burp spring: swell, snap small, spring back
     if (burp) {
@@ -330,7 +396,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
           hole.sv = 0
           const a = ejectDir()
           const r = RETURNS.find((x) => x.id === burp!.id)!
-          const it = mk(hole.x, hole.y, clamp(m0() * 0.16, 64, 88), r.k, 0)
+          const it = mk(hole.x, hole.y, retSize(), r.k, 0)
           it.appear = -1
           // drag 0.95 per frame: travel = v0 / 60 / 0.05, so 520 px/s comes to rest about 173 px out
           const v0 = ejectDist() * 3
@@ -380,7 +446,11 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
           it.hx += it.vx * dt
           it.hy += it.vy * dt
           it.spin *= Math.exp(-2.4 * dt)
-          if (Math.abs(it.vx) + Math.abs(it.vy) < 4) it.vx = it.vy = it.spin = 0
+          if (Math.abs(it.vx) + Math.abs(it.vy) < 30) {
+            it.vx = it.vy = it.spin = 0
+            it.land = time
+            haptic(8)
+          }
         }
         it.x = it.hx + Math.sin(time * 0.6 + it.phase) * 2.2
         it.y = it.hy + Math.cos(time * 0.5 + it.phase * 1.3) * 2.2
@@ -406,15 +476,19 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     }
     if (alive <= 0 && clearAt < 0 && items.length) clear()
 
-    for (const s of sparks) {
+    let sj = 0
+    const sd = Math.pow(0.94, dt * 60)
+    for (let i = 0; i < sparks.length; i++) {
+      const s = sparks[i]
       s.life -= dt
-      const d = Math.pow(0.94, dt * 60)
-      s.vx *= d
-      s.vy *= d
+      if (s.life <= 0) continue
+      s.vx *= sd
+      s.vy *= sd
       s.x += s.vx * dt
       s.y += s.vy * dt
+      sparks[sj++] = s
     }
-    sparks = sparks.filter((s) => s.life > 0)
+    sparks.length = sj
     if (gw.a > 0) {
       gw.r += dt * 900
       gw.a = Math.max(0, gw.a - dt * 0.8)
@@ -425,10 +499,11 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   }
 
   // ---------- drawing ----------
-  const drawIdle = (it: Item, t: number, capR: number, R: number) => {
+  let G!: Renderer
+  const drawIdle = (it: Item, t: number, capR: number, R: number, k = 1) => {
     let x = it.x
     let y = it.y
-    let s = it.size
+    let s = it.size * k
     const born = -it.appear
     if (born < 0.35) s *= Math.max(0, easeOutBack(born / 0.35))
     if (s <= 0.5) return
@@ -450,15 +525,13 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     const uv = UV[it.k]
     // warm light from the disk, per corner so the side facing the hole is brighter
     const Lr = R * 3
-    const i0 = gl.nv
-    if (!gl.room(4, 6)) return
-    const corners = [
-      [-1, -1, uv[0], uv[1]],
-      [1, -1, uv[2], uv[1]],
-      [1, 1, uv[2], uv[3]],
-      [-1, 1, uv[0], uv[3]],
-    ]
-    for (const [cx, cy, u, v] of corners) {
+    const i0 = G.nv
+    if (!G.room(4, 6)) return
+    for (let ci = 0; ci < 4; ci++) {
+      const cx = CX[ci]
+      const cy = CY[ci]
+      const u = uv[CU[ci]]
+      const v = uv[CV[ci]]
       let ox = (cx * c - cy * sn) * hw
       let oy = (cx * sn + cy * c) * hw
       // shear about the centre: n = toward hole, t = tangent
@@ -472,10 +545,10 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
       const py = y + oy
       const dd = Math.hypot(px - hole.x, py - hole.y)
       const L = (0.18 + hole.heat * 0.35) * (Lr * Lr) / (dd * dd + Lr * Lr)
-      gl.vert(px, py, u, v, 1, 1, 1, 1, 0, L)
+      G.vert(px, py, u, v, 1, 1, 1, 1, 0, L)
     }
-    gl.tri(i0, i0 + 1, i0 + 2)
-    gl.tri(i0, i0 + 2, i0 + 3)
+    G.tri(i0, i0 + 1, i0 + 2)
+    G.tri(i0, i0 + 2, i0 + 3)
   }
 
   /** A captured item as a noodle along its spiral (spaghettification). */
@@ -498,8 +571,8 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     const rs = Math.sin(rel)
     const omega = clamp(900 / (it.pr + 20), 3, 26)
     const pitch = clamp(it.vr / (omega * Math.max(it.pr, 1)), -1.5, 0)
-    if (!gl.room((NA + 1) * (NC + 1), NA * NC * 6)) return
-    const base = gl.nv
+    if (!G.room((NA + 1) * (NC + 1), NA * NC * 6)) return
+    const base = G.nv
     const Lr = R * 3
     for (let a = 0; a <= NA; a++)
       for (let b = 0; b <= NC; b++) {
@@ -515,13 +588,13 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
         const lt = (0.25 + hole.heat * 0.35) * (Lr * Lr) / (r * r + Lr * Lr)
         // each vertex dims and reddens as it nears the horizon, so the head of the noodle goes first
         const fade = clamp((r - R * 0.98) / (R * 0.45), 0, 1)
-        gl.vert(px, py, uv[0] + (uv[2] - uv[0]) * (sx + 0.5), uv[1] + (uv[3] - uv[1]) * (sy + 0.5), 1, 0.55 + 0.45 * fade, 0.35 + 0.65 * fade, fade, hot, lt)
+        G.vert(px, py, uv[0] + (uv[2] - uv[0]) * (sx + 0.5), uv[1] + (uv[3] - uv[1]) * (sy + 0.5), 1, 0.55 + 0.45 * fade, 0.35 + 0.65 * fade, fade, hot, lt)
       }
     for (let a = 0; a < NA; a++)
       for (let b = 0; b < NC; b++) {
         const i = base + a * (NC + 1) + b
-        gl.tri(i, i + NC + 1, i + NC + 2)
-        gl.tri(i, i + NC + 2, i + 1)
+        G.tri(i, i + NC + 1, i + NC + 2)
+        G.tri(i, i + NC + 2, i + 1)
       }
   }
 
@@ -531,11 +604,21 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     // shake offset (translate only; GL pass and sprites move together)
     const tr = shake.trauma * shake.trauma
     const n = (k: number) => Math.sin(now * 0.07 * k + k) * Math.cos(now * 0.031 * k * 1.7)
-    gl.off[0] = tr > 0 ? shake.maxPx * tr * n(13) : 0
-    gl.off[1] = tr > 0 ? shake.maxPx * tr * n(29) : 0
+    const ox = tr > 0 ? shake.maxPx * tr * n(13) : 0
+    const oy = tr > 0 ? shake.maxPx * tr * n(29) : 0
+    const line = `${alive} · ${waveTime.toFixed(1)}s`
+    if (hud && line !== hudLine) hud.textContent = hudLine = line
+    if (!gl) {
+      if (fctx) draw2D(fctx, ox, oy)
+      drawOverlay()
+      return
+    }
+    G = gl
+    gl.off[0] = ox
+    gl.off[1] = oy
 
     const R = hole.vr * hole.scale * (1 + hole.pulse * 0.08)
-    gl.hole({ x: hole.x, y: hole.y, R, t: hole.disk, on: DEV && q.has('nohole') ? 0 : 1, heat: clamp(hole.heat + Math.min(0.5, step * 0.02), 0, 1), waveR: gw.r, waveA: gw.a })
+    gl.hole({ x: hole.x, y: hole.y, R, t: hole.disk, on: 1, heat: clamp(hole.heat + Math.min(0.5, step * 0.02), 0, 1), waveR: gw.r, waveA: gw.a })
 
     const capR = hole.r * 3.6
     // glow behind a returned item so a dark thing still reads on the dark sky
@@ -545,7 +628,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
         gl.quadRot(it.x, it.y, s, s, 1, 0, DOT_UV, 0.25, 0.55, 0.65, 0.55)
       }
     gl.flush(true)
-    for (const it of items) if (it.state === 0 && it.appear <= 0) drawIdle(it, t, capR, R)
+    for (const it of items) if (it.state === 0 && it.appear <= 0) drawIdle(it, t, capR, R, landScale(it))
     for (const it of items) if (it.state === 1) drawNoodle(it, capR, R)
     gl.flush(false)
     for (const s of sparks) {
@@ -559,11 +642,81 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     }
     gl.flush(true)
 
-    // HUD: a DOM pill, written only when the text changes
-    const line = `${alive} · ${waveTime.toFixed(1)}s`
-    if (hud && line !== hudLine) hud.textContent = hudLine = line
-
     drawOverlay()
+  }
+
+  /** Little boing when a returned item comes to rest. */
+  const landScale = (it: Item) => {
+    if (it.land < 0) return 1
+    const t = time - it.land
+    return t > 0.8 ? 1 : 1 + 0.16 * Math.exp(-5 * t) * Math.sin(t * 22)
+  }
+
+  /** Canvas 2D picture for when WebGL is missing or lost: a black disc in a soft ring, items scaling into it. */
+  const draw2D = (c: CanvasRenderingContext2D, ox: number, oy: number) => {
+    const { w, h, dpr } = stage
+    c.setTransform(dpr, 0, 0, dpr, 0, 0)
+    c.globalAlpha = 1
+    c.globalCompositeOperation = 'source-over'
+    if (sky) c.drawImage(sky, 0, 0, w, h)
+    const R = hole.vr * hole.scale * (1 + hole.pulse * 0.08)
+    const hx = hole.x + ox
+    const hy = hole.y + oy
+    c.globalCompositeOperation = 'lighter'
+    const g = c.createRadialGradient(hx, hy, R * 0.9, hx, hy, R * 3.6)
+    g.addColorStop(0, `rgba(255,190,120,${0.7 + hole.heat * 0.3})`)
+    g.addColorStop(0.12, 'rgba(255,140,60,0.35)')
+    g.addColorStop(0.45, 'rgba(160,70,40,0.12)')
+    g.addColorStop(1, 'rgba(80,40,120,0)')
+    c.fillStyle = g
+    c.beginPath()
+    c.arc(hx, hy, R * 3.6, 0, Math.PI * 2)
+    c.fill()
+    c.globalCompositeOperation = 'source-over'
+    c.fillStyle = '#000'
+    c.beginPath()
+    c.arc(hx, hy, R, 0, Math.PI * 2)
+    c.fill()
+    c.strokeStyle = 'rgba(255,226,176,0.85)'
+    c.lineWidth = 1.5
+    c.stroke()
+    const capR = hole.r * 3.6
+    const sprite = (it: Item, x: number, y: number, a: number, sx: number, sy: number, alpha: number) => {
+      const uv = UV[it.k]
+      const cs = Math.cos(a)
+      const sn = Math.sin(a)
+      c.globalAlpha = alpha
+      c.setTransform(dpr * cs * sx, dpr * sn * sx, -dpr * sn * sy, dpr * cs * sy, dpr * (x + ox), dpr * (y + oy))
+      c.drawImage(atlas, uv[0] * ATLAS, uv[1] * ATLAS, (uv[2] - uv[0]) * ATLAS, (uv[3] - uv[1]) * ATLAS, -0.5, -0.5, 1, 1)
+    }
+    for (const it of items) {
+      if (it.state === 2 || it.appear > 0) continue
+      if (it.state === 0) {
+        let s = it.size * landScale(it)
+        const born = -it.appear
+        if (born < 0.35) s *= Math.max(0, easeOutBack(born / 0.35))
+        if (s > 0.5) sprite(it, it.x, it.y, it.rot, s, s, 1)
+      } else {
+        // scale into the centre, stretched along the orbit
+        const kk = 1 - clamp(it.pr / capR, 0, 1)
+        const s = it.size * clamp(it.pr / (capR * 0.9), 0.15, 1)
+        sprite(it, it.x, it.y, it.pa + Math.PI / 2, s * (1 + 1.2 * kk * kk), s * (1 - 0.5 * kk), clamp((it.pr - R * 0.9) / (R * 0.5), 0, 1))
+      }
+    }
+    c.setTransform(dpr, 0, 0, dpr, 0, 0)
+    c.globalAlpha = 1
+    c.globalCompositeOperation = 'lighter'
+    for (const s of sparks) {
+      const f = s.life / s.max
+      c.fillStyle = `rgba(${(s.r * 255) | 0},${(s.g * 255) | 0},${(s.b * 255) | 0},${f})`
+      const z = s.size * 0.4 * (0.4 + 0.6 * f)
+      c.fillRect(s.x + ox - z, s.y + oy - z, z * 2, z * 2)
+    }
+    c.globalCompositeOperation = 'source-over'
+    if (flashA > 0.01) {
+      c.fillStyle = `rgba(${flashC.map((v) => (v * 255) | 0).join(',')},${flashA})`
+      c.fillRect(0, 0, w, h)
+    }
   }
 
   const drawOverlay = () => {
@@ -687,6 +840,9 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
     hum?.stop()
     window.removeEventListener('resize', resize)
     canvas.removeEventListener('contextmenu', noMenu)
+    canvas.removeEventListener('webglcontextlost', onLost)
+    canvas.removeEventListener('webglcontextrestored', onRestored)
+    fb?.remove()
     canvas.removeEventListener('pointerdown', onDown)
     canvas.removeEventListener('pointermove', onMove)
     canvas.removeEventListener('pointerup', onUp)

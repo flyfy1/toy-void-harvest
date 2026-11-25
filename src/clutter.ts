@@ -35,7 +35,7 @@ export const MESS: { k: number; w: number; s: number }[] = [
   { k: K.Keys, w: 1.4, s: 0.95 },
   { k: K.Charger, w: 1.4, s: 1.05 },
   { k: K.Bubble, w: 2.0, s: 0.92 },
-  { k: K.Email, w: 2.0, s: 0.95 },
+  { k: K.Email, w: 1.5, s: 1.18 },
   { k: K.Monday, w: 1.0, s: 1.0 },
 ]
 
@@ -361,27 +361,19 @@ function email(c: C) {
   // flap
   c.beginPath()
   c.moveTo(10, 27)
-  c.lineTo(46, 56)
+  c.lineTo(46, 46)
   c.lineTo(82, 27)
   c.strokeStyle = '#9AA3B8'
   c.lineWidth = 3
   c.lineJoin = 'round'
   c.stroke()
-  c.beginPath()
-  c.moveTo(10, 75)
-  c.lineTo(36, 50)
-  c.moveTo(82, 75)
-  c.lineTo(56, 50)
-  c.strokeStyle = 'rgba(154,163,184,0.6)'
-  c.lineWidth = 2
-  c.stroke()
-  // who it is from (the 甲方 joke): a bold sender tag on the front
+  // who it is from (the 甲方 joke): a bold red sender stamp across the front, big enough to read on a phone
   const who = vt('void_client')
-  c.font = `900 ${who.length > 3 ? 15 : 21}px ${FONT}`
+  c.font = `900 ${who.length > 3 ? 21 : 27}px ${FONT}`
   c.textAlign = 'center'
   c.textBaseline = 'middle'
-  c.fillStyle = '#C81E3A'
-  c.fillText(who, 46, 67, 64)
+  c.fillStyle = '#D0213F'
+  c.fillText(who, 46, 64, 72)
   // "urgent" flag: red circle with !
   c.beginPath()
   c.arc(80, 24, 15, 0, Math.PI * 2)

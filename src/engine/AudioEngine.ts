@@ -46,6 +46,13 @@ class AudioEngine {
 
   /** Call from the first pointerdown. Creates/resumes the context. */
   unlock(): void {
+    this.prewarm()
+    if (this.ctx && this.ctx.state !== 'running') void this.ctx.resume()
+  }
+
+  /** Creates the context (suspended until a gesture) and the noise buffer. void calls this while idle after load,
+   *  because creating an AudioContext takes ~100 ms and would otherwise land on the first touch. */
+  prewarm(): void {
     if (!this.ctx) {
       const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
       if (!AC) return
@@ -67,11 +74,11 @@ class AudioEngine {
       this.master = master
       this.noiseBuf = buf
     }
-    if (this.ctx.state !== 'running') void this.ctx.resume()
   }
 
   private get ok(): boolean {
-    return !!this.ctx && !!this.master
+    // a prewarmed context stays suspended until a gesture; do not queue sounds into it meanwhile
+    return !!this.ctx && !!this.master && this.ctx.state === 'running'
   }
 
   /** Voice budget for the high-rate sounds only (pop/chime/blip), so a 300-bubble

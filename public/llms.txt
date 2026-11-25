@@ -1,15 +1,16 @@
 # Void Harvest
 
-> Hundreds of jittery shapes, and your cursor is a black hole. Spiral them in as the notes climb, and clear the screen in five seconds. A tiny stress-relief toy, no sign-up.
+> A screen full of everyday clutter (socks, receipts, keys, chargers, 99+ unread messages, client emails, Monday) and your cursor is a real-looking black hole that bends the starlight. Sweep it all in, watch it stretch like spaghetti, and clear the screen in seconds. Sometimes the hole gives one thing back. A tiny stress-relief toy, no sign-up.
 
 Void Harvest (黑洞收割 (zh-CN), Agujero Negro (es), Trou Noir (fr), ブラックホール (ja)) is a free browser toy at https://void.integ.life/ by Integ Life. It opens straight into play: no sign-up, no download, no ads, no tutorial. It works with a mouse or a touchscreen on phones, tablets and computers.
 
 ## How to play
 
-1. Move your mouse, or drag your finger on a phone. The cursor becomes a black hole.
-2. Every shape that comes close spirals in and is swallowed. Each one plays a note on a rising pentatonic scale, so the faster you sweep the higher the melody climbs, and the hole grows as it eats.
-3. Clear every shape for a CLEAR! burst and chord. Under five seconds counts as a speed clear. The next wave arrives 0.8 seconds later in a new pattern (grid, sunflower, rings, rainbow or diamond).
-4. On a computer, click once to turn the sound on; browsers only allow audio after a click or tap.
+1. Move your mouse, or drag your finger on a phone. The cursor is a black hole with a glowing accretion disk, and it bends the starlight behind it.
+2. The screen is full of everyday clutter: socks, receipts, keys, phone chargers, 99+ unread messages, emails from the client and Monday. Everything that comes close is caught, stretched like spaghetti along its spiral and swallowed. Each one plays a note on a rising pentatonic scale, so the faster you sweep the higher the melody climbs, and the hole grows as it eats.
+3. Clear the screen for a CLEAR! and a ripple through space. Under five seconds counts as a speed clear.
+4. After some clears the hole burps and gives one lost thing back: one sock (the other stays), one of your 400 hair ties, the left earbud at 0% battery, or an umbrella that is not yours. It stays for the next wave, and you can swallow it again.
+5. On a computer, click once to turn the sound on; browsers only allow audio after a click or tap.
 
 ## Facts
 
@@ -21,6 +22,12 @@ Void Harvest (黑洞收割 (zh-CN), Agujero Negro (es), Trou Noir (fr), ブラ�
 - Made by: Integ Life (https://integ.life/), first published 2026-11-24
 
 ## FAQ
+
+**Is this what a real black hole looks like?**
+Roughly. The bright ring hugging the dark centre is the photon ring from the first black hole photograph (M87*); the disk is brighter on the side that moves toward you, and the far side of the disk is bent up over the top by gravity, as in the film Interstellar. Swallowed things are stretched along their path before they vanish, which physicists call spaghettification.
+
+**Why does the black hole give a sock back?**
+Because everyone has lost exactly one sock. After a clear the hole sometimes returns one lost thing with a short note, and keeps the rest.
 
 **Is Void Harvest free?**
 Yes. It is free, with no sign-up, no download and no ads. It runs in any modern browser on phones, tablets and computers.

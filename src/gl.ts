@@ -88,7 +88,11 @@ void main(){
     float near=wn>0.?disk(length(dd),atan(dd.y,dd.x))*wn:0.;
     // brighter close in (the bent image is magnified), same factor for both halves so they meet cleanly
     float heat=(2.2+u_heat*.9)*(1.+.6*min(1.25/bq,1.));
-    em+=ramp((far*sh+near)*heat);
+    // a small hole is only a few px across: lift the bent far half so the arc over the top still reads
+    float small=clamp((60.-u_R/u_dpr)/36.,0.,1.);
+    // the lift fades to nothing at the midline, where the two halves meet
+    float lift=1.+1.1*small*clamp(abs(q.y)*3.75/bq,0.,1.);
+    em+=ramp((far*sh*lift+near)*heat);
   }
   // photon ring: thin and lopsided (brighter on the approaching side and below, like M87*)
   float lop=.35+.65*pow(.5-.5*cos(ang-.6),1.3);
@@ -238,6 +242,17 @@ export class Renderer {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0)
     gl.drawArrays(gl.TRIANGLES, 0, 3)
     gl.disableVertexAttribArray(0)
+  }
+
+  /** Compile, link and upload now (during load), so the first real frame does not pay for it. */
+  warm() {
+    this.hole({ x: 0, y: 0, R: 10, t: 0, on: 1, heat: 0, waveR: 0, waveA: 0 })
+    this.quadRot(0, 0, 1, 1, 1, 0, [0, 0, 0, 0], 0, 0, 0, 0)
+    this.flush(false)
+    this.quadRot(0, 0, 1, 1, 1, 0, [0, 0, 0, 0], 0, 0, 0, 0)
+    this.flush(true)
+    const px = new Uint8Array(4)
+    this.gl.readPixels(0, 0, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, px)
   }
 
   /** Room for n more vertices? */
