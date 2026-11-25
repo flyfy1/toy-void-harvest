@@ -7,6 +7,9 @@ const SITES: { id: ToyId; icon: string }[] = [
   { id: 'void', icon: '🕳️' },
   { id: 'smash', icon: '🔨' },
   { id: 'pop', icon: '🫧' },
+  { id: 'knock', icon: '🪵' },
+  // Lap Cat is not live yet: add 'purr' to ToyId, TITLES and name_/desc_ in i18n, then enable this line.
+  // { id: 'purr', icon: '🐈' },
 ]
 
 export function MoreMenu({ current }: { current: ToyId }) {

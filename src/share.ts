@@ -4,7 +4,7 @@ import { t, type ToyId } from './i18n'
 /** Best moment of this visit, written by the game, read when sharing. */
 export const stats: { n?: number; words?: string[] } = {}
 
-// ---------- smash: custom words travel in the URL (?w=BUG,加班,老板) ----------
+// ---------- smash / knock: custom words travel in the URL (?w=BUG,加班,老板) ----------
 
 const MAX_WORDS = 10
 const MAX_LEN = 12
@@ -40,12 +40,13 @@ export function syncWordsToUrl(words: string[]) {
 
 export function shareUrl(toy: ToyId): string {
   const base = `https://${toy}.integ.life/`
-  if (toy === 'smash' && stats.words?.length) return `${base}?w=${encodeWords(stats.words)}`
+  if ((toy === 'smash' || toy === 'knock') && stats.words?.length) return `${base}?w=${encodeWords(stats.words)}`
   return base
 }
 
 export function shareText(toy: ToyId): string {
   if (toy === 'smash' && stats.words?.length) return t('share_smash_words', { w: stats.words.join(', ') })
+  if (toy === 'knock' && stats.words?.length) return t('share_knock_words', { w: stats.words.join(', ') })
   if (toy !== 'smash' && stats.n) return t(`share_${toy}_stat`, { n: stats.n })
   return t(`share_${toy}`)
 }

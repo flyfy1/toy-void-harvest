@@ -32,7 +32,7 @@ Yes. Every sound is synthesised live in the browser with the Web Audio API, so t
 English, 简体中文 (Simplified Chinese), Español, Français and 日本語 (Japanese). The language is picked automatically from your browser settings; any other language falls back to English.
 
 **Who made it?**
-Integ Life (integ.life). Void Harvest is one of four small stress-relief toys, together with Charge Burst, Glass Smash, Chain Pop. More games are at games.integ.life.
+Integ Life (integ.life). Void Harvest is one of five small stress-relief toys, together with Charge Burst, Glass Smash, Chain Pop, Knock on Wood. More games are at games.integ.life.
 
 **Is any personal data collected?**
 No account and no personal data. At most, anonymous usage statistics (page views and play counts) are collected.
@@ -42,4 +42,5 @@ No account and no personal data. At most, anonymous usage statistics (page views
 - [Charge Burst](https://charge.integ.life/): Hold to charge a glowing energy core, release to detonate it.
 - [Glass Smash](https://smash.integ.life/): Smash a pane of glass with the word you hate written on it.
 - [Chain Pop](https://pop.integ.life/): Pop neon bubbles, then set off a full-screen chain reaction.
+- [Knock on Wood](https://knock.integ.life/): Tap a wooden fish. Merit +1.
 - [Integ Games](https://games.integ.life/): more browser games

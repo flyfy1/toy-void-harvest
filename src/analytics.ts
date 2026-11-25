@@ -12,6 +12,8 @@ const TITLES: Record<ToyId, string> = {
   void: 'Toy · Void Harvest',
   smash: 'Toy · Glass Smash',
   pop: 'Toy · Chain Pop',
+  knock: 'Toy · Knock on Wood',
+  // purr: 'Toy · Lap Cat', // not live yet (purr.integ.life); enable together with the ToyId
 }
 
 type W = Window & { dataLayer?: unknown[] }
