@@ -4,12 +4,12 @@ import { useEffect, useState } from 'react'
  * The landing tag: a small paper label near the top that says somebody sent this. In the toy's own
  * material (pass the paper's classes); it never takes a touch and goes away on the first one.
  */
-export function Tag({ text, className = '', paper = 'bg-[#FFF8EA] text-[#3A2A1C]' }: { text: string; className?: string; paper?: string }) {
+export function Tag({ text, className = '', paper = 'bg-[#FFF8EA] text-[#3A2A1C]', ms = 9000 }: { text: string; className?: string; paper?: string; ms?: number }) {
   const [on, setOn] = useState(true)
   useEffect(() => {
     const off = () => setOn(false)
     window.addEventListener('pointerdown', off, { once: true, capture: true })
-    const tm = window.setTimeout(off, 9000)
+    const tm = window.setTimeout(off, ms)
     return () => {
       window.removeEventListener('pointerdown', off, true)
       window.clearTimeout(tm)

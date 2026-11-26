@@ -1,0 +1,21 @@
+// Portal copy in en (shared file, loaded with the portals chunk): [bubble, verb, arrival tag, smash's first pane] per link.
+import type { Copy } from '../portals'
+
+export default {
+  'silk-cat': ['This cat runs an office elsewhere.', 'Pet it', 'The one from the windowsill. It jumped.'],
+  'yoink-cat': ['It won’t budge. Elsewhere it takes visitors.', 'Pet it', 'The one from the table. It denies the cup.'],
+  'yoink-bowl': ['Broken anyway. Somewhere, that’s allowed.', 'Smash', 'This one isn’t your mum’s. Go ahead.', 'WHICH BOWL?'],
+  'purr-glass': ['The glass fell by itself. Want to break one?', 'Smash', 'The cat sent you. It accepts no liability.', 'GRAVITY'],
+  'pop-fragile': ['Fragile? There’s a place to check.', 'Smash', 'This was in the box. Fragile, it says.', 'FRAGILE'],
+  'twirl-coin': ['This coin could scratch a card.', 'Scratch', 'The coin from the skirt pocket. Scratch with it.'],
+  'void-sock': ['The other one is on a clothesline somewhere.', 'Go look', 'The other sock is outside. Open the curtain.'],
+  'peel-remote': ['There’s a whole table you’re not to touch.', 'Pull it', 'You peeled the remote. Might as well.'],
+  'knock-incense': ['The smoke is drifting toward a window.', 'Follow it', 'The incense smoke ended up here.'],
+  'charge-fish': ['This angry? Go knock on wood.', 'Knock', 'The pufferfish sent you to calm down.'],
+  'squish-paw': ['This is a replica. The real paw is elsewhere.', 'Touch it', 'The real paw. Touching by appointment.'],
+  'scratch-prize_cat': ['', 'Pet it', 'The cat you won. On loan only.'],
+  'scratch-prize_merit': ['', 'Knock', 'Your merit is here. Knock for it yourself.'],
+  'scratch-prize_pop': ['', 'Pop it', 'The bubble wrap you won. A whole sheet.'],
+  'scratch-prize_squish': ['', 'Squish it', 'The bun you won. It can take it.'],
+  'scratch-prize_glass': ['', 'Smash', 'The glass you won. No returns.'],
+} satisfies Copy

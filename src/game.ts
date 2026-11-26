@@ -1,6 +1,6 @@
 import { audio, pentaFreq, type Riser } from './engine/AudioEngine'
 import { act, track } from './analytics'
-import { stats } from './share'
+import { offer, stats } from './share'
 import { HitStop, Shake, clamp, easeOutBack, haptic, runLoop } from './engine/juice'
 import { Renderer } from './gl'
 import { ATLAS, K, MESS, RETURNS, bakeAtlas, cellUV, type ReturnId } from './clutter'
@@ -190,7 +190,8 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   let touchHeld = false
 
   // the burp
-  const forced = DEV ? (q.get('item') as ReturnId | null) : null
+  // ?item= (dev; and with ?portal=1, so the portal check on the live host can reach the sock)
+  const forced = DEV || q.get('portal') === '1' ? (q.get('item') as ReturnId | null) : null
   const order = RETURNS.map((r) => r.id).sort(() => rnd() - 0.5)
   let orderI = 0
   let clears = 0
@@ -439,6 +440,8 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
           shake.add(0.35)
           gw = { r: hole.r, a: 0.6 }
           track('void_return', { item: r.id })
+          // the returned sock: a portal to silk (its pair is on a clothesline there), under the caption once it is read
+          if (r.id === 'sock') offer('void', 'sock', () => (it.state === 0 && items.includes(it) ? [it.x, it.y + it.size * 0.55 + 4] : null), 3300)
           if (peakData) {
             peakData.back = RETURNS.indexOf(r) + 1
             snapAt = time + 0.45
@@ -484,7 +487,8 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
         }
         it.x = it.hx + Math.sin(time * 0.6 + it.phase) * 2.2
         it.y = it.hy + Math.cos(time * 0.5 + it.phase * 1.3) * 2.2
-        if (canEat) {
+        // a returned item flies and then lies untouchable for 6 s (time to read it, and for the sock's bubble)
+        if (canEat && !(it.ret && (it.land < 0 || time - it.land < 6))) {
           const dx = it.x - hole.x
           const dy = it.y - hole.y
           const d = Math.hypot(dx, dy)
@@ -851,6 +855,8 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
         return { n: a.length, avg: a.reduce((s, v) => s + v, 0) / Math.max(1, a.length), p99: a[Math.floor(a.length * 0.01)], max: a[0] }
       },
       state: () => ({ alive, wave, captured: items.filter((i) => i.state === 1).length, hole: { ...hole }, burp: burp ? { id: burp.id, capT: burp.capT } : null }),
+      /** a returned item still out on the field (tests: where the sock lies) */
+      ret: () => items.filter((i) => i.ret && i.state === 0).map((i) => ({ id: i.ret, x: i.x, y: i.y })),
     }
   }
 

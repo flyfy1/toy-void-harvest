@@ -129,19 +129,24 @@ export interface Landing {
   kind: 'words' | 'name' | 'time' | 'score' | 'view' | 'plain'
 }
 
-/** Read `r` once, before any sync…ToUrl runs, then take it out of the address bar. */
+/** A portal visit (`?from=silk-cat-1`, portals.ts checks it against the link table): '' when absent, malformed, or beaten by a share. */
+export let arrivedFrom = ''
+
+/** Read `r` (and a portal's `from`) once, before any sync…ToUrl runs, then take them out of the address bar. */
 export const landing: Landing = (() => {
   const out: Landing = { recipient: false, src: 'none', hop: 0, kind: 'plain' }
   try {
     const q = new URLSearchParams(location.search)
     const r = q.get('r')
+    const f = q.get('from') || ''
     const m = r && /^([flcqd])([1-9])$/.exec(r)
     if (m) {
       out.src = m[1] as Method
       out.hop = Number(m[2])
     }
-    if (q.has('r')) {
+    if (q.has('r') || q.has('from')) {
       q.delete('r')
+      q.delete('from')
       const url = new URL(location.href)
       url.search = q.toString() ? `?${q.toString()}` : ''
       history.replaceState(null, '', url.toString())
@@ -156,6 +161,8 @@ export const landing: Landing = (() => {
     }
     const content = canon(location.search)
     out.recipient = sent && !(content && content === mine)
+    // a share beats a portal: a friend's message matters more than a joke
+    if (!r && !out.recipient && /^[a-z]+-[a-z_]+-\d$/.test(f)) arrivedFrom = f
   } catch {
     /* no URL API: treat as a plain visit */
   }
@@ -216,6 +223,8 @@ export const store = {
   /** sheet open, and where from */
   sheet: null as From | null,
   version: 0,
+  /** performance.now() of the last peak (a portal bubble waits 2.5 s after one) */
+  peakAt: -1e9,
 }
 const subs = new Set<() => void>()
 export function subscribe(fn: () => void) {
@@ -234,9 +243,9 @@ export function emit() {
  */
 export const live: { snap: (() => HTMLCanvasElement | null) | null; data: (() => Record<string, number>) | null; reply?: () => void; ticket?: () => HTMLCanvasElement | null } = { snap: null, data: null }
 
-/** Is a finger (or button) down right now? The slip never appears under a finger. */
-export const pointer = { down: false }
-addEventListener('pointerdown', () => (pointer.down = true), true)
+/** Is a finger (or button) down right now? The slip never appears under a finger. `first`: performance.now() of the first touch. */
+export const pointer = { down: false, first: 0 }
+addEventListener('pointerdown', () => (pointer.down = true, pointer.first ||= performance.now()), true)
 addEventListener('pointerup', () => (pointer.down = false), true)
 addEventListener('pointercancel', () => (pointer.down = false), true)
 
@@ -246,7 +255,7 @@ addEventListener('pointercancel', () => (pointer.down = false), true)
  * card without a slip (knock's later milestones).
  */
 export function sharePeak(toy: ToyId, peak: Peak, quiet = false) {
-  const t0 = performance.now()
+  const t0 = (store.peakAt = performance.now())
   store.toy = toy
   store.peak = peak
   store.done = true
@@ -264,6 +273,7 @@ export function sharePeak(toy: ToyId, peak: Peak, quiet = false) {
  */
 export function peakEvery(toy: ToyId, n: number, peak: Peak) {
   if ([1, 5, 20, 50].includes(n)) return sharePeak(toy, peak)
+  store.peakAt = performance.now()
   store.toy = toy
   store.peak = peak
   store.done = true
@@ -274,4 +284,22 @@ export function openSheet(from: From) {
   store.slip = 0
   store.dot = false
   emit()
+}
+
+// ---------- portals: one object in a toy's scene that belongs to another toy (portals.ts, a lazy chunk) ----------
+
+const portals = () => import('./portals').then((m) => m.ready.then(() => m))
+/** Where the object is on screen now (CSS px), or null once it is gone. */
+export type Anchor = () => readonly [number, number] | null
+/** The portal object was tapped (or did its gag): the chunk counts, checks the caps and maybe shows the bubble. */
+export function offer(toy: ToyId, obj: string, at: Anchor, wait = 0) {
+  portals().then((m) => m.offer(toy, obj, at, wait), () => {})
+}
+/** A portal visit: shows the arrival tag (`tag`: the Tag's position and paper classes) and resolves to the object it came from. */
+export function arrive(toy: ToyId, tag: [string, string]): Promise<import('./portals').Arrived | null> {
+  return arrivedFrom ? portals().then((m) => m.arrive(toy, tag), () => null) : Promise.resolve(null)
+}
+/** scratch: a prize toast's second line (`verb · host →`, the only link in it), or null when a cap says no */
+export function prizeLine(obj: string): Promise<ReturnType<typeof import('./portals').prizeLine>> {
+  return portals().then((m) => m.prizeLine(obj), () => null)
 }
