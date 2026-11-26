@@ -707,6 +707,12 @@ const VOID = {
 export const VOID_ATE = ['sock', 'receipt', 'keys', 'charger', 'bubble', 'email', 'monday'] as const
 export const VOID_BACK = ['sock', 'tie', 'bud', 'umbrella'] as const
 
+/** peel's objects, in the order the game numbers them (peak data `it` and `left`, the link's ?obj=). */
+export const PEEL_ITEMS = ['phone', 'steel', 'remote', 'cam', 'watch', 'car', 'micro', 'fridge', 'laptop', 'cabinet'] as const
+/** How many of them are built so far: the kinds row's total. */
+const PEEL_LIVE = 7
+const peelLeft = () => PEEL_ITEMS[store.peak?.data.left ?? 2] ?? 'remote'
+
 /** peel: 撕膜证明 / Certificate of Peeling. */
 const PEEL = {
   en: {
@@ -717,8 +723,13 @@ const PEEL = {
     v_remote: '“The remote was like that when I found it”',
     v_one: '“One pull. No tearing.”',
     v_else: '“Crooked still counts”',
+    kinds: ['Kinds', '{d} of {t}'],
+    v_cam: '“It was never my shaky hands”',
+    v_watch: '“The film always said 10:09”',
+    v_car: '“The dealer said it was factory-fitted”',
+    v_micro: '“The bit under the trim stays”',
     small: 'Remove before use. No liability after removal.',
-    done: 'Peeled {n} films today. Mum does not know. I left you the remote:',
+    done: 'Peeled {n} films today. Mum does not know. I left you {obj}:',
     invite: 'There is a film waiting to be peeled. Mum is out:',
   },
   'zh-CN': {
@@ -729,8 +740,13 @@ const PEEL = {
     v_remote: '「遥控器的膜不是我撕的」',
     v_one: '「一口气，没断」',
     v_else: '「撕歪了也算」',
+    kinds: ['品类', '{d} / {t} 种'],
+    v_cam: '「原来不是我手抖」',
+    v_watch: '「膜上的时间一直是 10:09」',
+    v_car: '「4S 店说是原厂的」',
+    v_micro: '「缝里那一圈，就这样吧」',
     small: '撕前请勿使用。撕后概不负责。',
-    done: '今天撕了 {n} 张膜，我妈还不知道。遥控器那张留给你：',
+    done: '今天撕了 {n} 张膜，我妈还不知道。{obj}那张留给你：',
     invite: '有张膜等你撕。你妈不在：',
   },
   es: {
@@ -741,8 +757,13 @@ const PEEL = {
     v_remote: '«El mando ya estaba así»',
     v_one: '«De un tirón. Sin romperse.»',
     v_else: '«Torcido también cuenta»',
+    kinds: ['Tipos', '{d} de {t}'],
+    v_cam: '«No era mi pulso»',
+    v_watch: '«El plástico siempre marcó las 10:09»',
+    v_car: '«En el concesionario dijeron que venía de fábrica»',
+    v_micro: '«Lo de debajo del marco se queda»',
     small: 'Retirar antes de usar. Sin responsabilidad después.',
-    done: 'Hoy he despegado {n} láminas. Mamá no lo sabe. Te he dejado la del mando:',
+    done: 'Hoy he quitado {n} plásticos. Mamá no lo sabe. Te dejo {obj}:',
     invite: 'Hay una lámina esperando a que la despegues. Mamá ha salido:',
   },
   fr: {
@@ -753,8 +774,13 @@ const PEEL = {
     v_remote: '« La télécommande était déjà nue »',
     v_one: '« D’un geste. Sans déchirer. »',
     v_else: '« De travers, ça compte aussi »',
+    kinds: ['Sortes', '{d} sur {t}'],
+    v_cam: '« Ce n’était pas moi qui tremblais »',
+    v_watch: '« Le film a toujours indiqué 10 h 09 »',
+    v_car: '« Le concessionnaire a dit que c’était d’origine »',
+    v_micro: '« Le bout sous la baguette reste »',
     small: 'À retirer avant usage. Aucune responsabilité après.',
-    done: 'J’ai retiré {n} films aujourd’hui. Maman ne sait rien. Je vous ai laissé la télécommande :',
+    done: '{n} films retirés aujourd’hui. Maman ne sait rien. Je vous laisse {obj} :',
     invite: 'Un film attend d’être retiré. Maman est sortie :',
   },
   ja: {
@@ -765,8 +791,13 @@ const PEEL = {
     v_remote: '「リモコンのフィルムは最初からなかった」',
     v_one: '「一気に、切れずに」',
     v_else: '「曲がってもはがしたうち」',
+    kinds: ['種類', '{d} / {t}'],
+    v_cam: '「手ブレじゃなかった」',
+    v_watch: '「フィルムはずっと 10:09」',
+    v_car: '「ディーラーは純正だと言った」',
+    v_micro: '「ふちの下はそのまま」',
     small: '使用前にはがしてください。はがした後は責任を負いません。',
-    done: '今日はフィルムを {n} 枚はがしました。母はまだ知りません。リモコンの分はあなたに：',
+    done: '今日は {n} 枚はがした。母はまだ知らない。{obj}のぶんは残しておいた：',
     invite: 'はがされ待ちのフィルムがあります。母は留守です：',
   },
 } satisfies Record<Locale, Record<string, string | string[]>>
@@ -843,9 +874,9 @@ export function shareUrl(toy: ToyId, method?: Method): string {
   else if ((toy === 'smash' || toy === 'knock' || toy === 'stamp') && stats.words?.length) q = `?w=${encodeWords(stats.words)}`
   else if (toy === 'purr') q = catQuery(stats.name || '', stats.coat || '')
   else if (toy === 'squish') q = bunQuery(stats.name || '', stats.skin || '')
-  // pop and void carry the sender's time as a challenge; every peel link starts on the remote
+  // pop and void carry the sender's time as a challenge; a peel link starts on the object left for the recipient
   else if ((toy === 'pop' || toy === 'void') && store.done && store.peak?.data.s) q = `?t=${store.peak.data.s}`
-  else if (toy === 'peel') q = '?obj=remote'
+  else if (toy === 'peel') q = `?obj=${peelLeft()}`
   const base = `https://${toy}.integ.life/${q && GIFT_PAGE.includes(toy) ? 'g/' : ''}`
   if (method) q += `${q ? '&' : '?'}r=${method}${hopOut()}`
   return base + q
@@ -921,7 +952,7 @@ export function shareText(toy: ToyId): string {
     }
     case 'peel': {
       const T = PEEL[locale]
-      return store.done && n ? fill(T.done, { n }) : T.invite
+      return store.done && n ? fill(T.done, { n, obj: tx(`peel_name_${peelLeft()}`) }) : T.invite
     }
     case 'pour':
       return !n ? tx('share_pour') : stats.last === 'golden' ? tx('share_pour_golden', { n }) : tx('share_pour_stat', { n, k })
@@ -956,7 +987,7 @@ export const shareExtra = (toy: ToyId): Record<string, number> =>
       : toy === 'scratch'
         ? { cards: stats.n ?? 0, wins: stats.k ?? 0 }
         : toy === 'peel' && stats.n
-          ? { peels: stats.n }
+          ? { peels: stats.n, kinds: store.peak?.data.d ?? 0 }
           : toy === 'pour'
             ? { total: stats.n ?? 0, golden: stats.k ?? 0 }
             : toy === 'stamp'
@@ -1083,8 +1114,11 @@ function peelDoc(p: Record<string, number> | null): Doc {
   const rows: [string, string][] = []
   if (n) rows.push([T.today[0], fill(T.today[1], { n })])
   if (p?.k) rows.push([T.one[0], fill(T.one[1], { k: p.k })])
+  if (p?.d && p.d >= 4) rows.push([T.kinds[0], fill(T.kinds[1], { d: p.d, t: PEEL_LIVE })])
   rows.push([T.mum[0], T.mum[1]])
-  const verdict = p?.remote ? T.v_remote : p?.k ? T.v_one : T.v_else
+  const it = p?.it !== undefined ? PEEL_ITEMS[p.it] : undefined
+  const vi = it ? (T as Record<string, unknown>)[`v_${it}`] : undefined
+  const verdict = p?.remote ? T.v_remote : typeof vi === 'string' ? vi : p?.k ? T.v_one : T.v_else
   return { look: look('peel'), title: T.title, rows, focus: 0.5, verdict, small: T.small, call: S.call, host: 'peel.integ.life' }
 }
 
