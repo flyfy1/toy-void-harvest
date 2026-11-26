@@ -1,0 +1,60 @@
+# Void Harvest
+
+> A screen full of everyday clutter (socks, receipts, keys, chargers, 99+ unread messages, client emails, Monday) and your cursor is a real-looking black hole that bends the starlight. Sweep it all in, watch it stretch like spaghetti, and clear the screen in seconds. Sometimes the hole gives one thing back. A tiny stress-relief toy, no sign-up.
+
+Void Harvest (黑洞收割 (zh-CN), Agujero Negro (es), Trou Noir (fr), ブラックホール (ja)) is a free browser toy at https://void.integ.life/ by Integ Life. It opens straight into play: no sign-up, no download, no ads, no tutorial. It works with a mouse or a touchscreen on phones, tablets and computers.
+
+## How to play
+
+1. Move your mouse, or drag your finger on a phone. The cursor is a black hole with a glowing accretion disk, and it bends the starlight behind it.
+2. The screen is full of everyday clutter: socks, receipts, keys, phone chargers, 99+ unread messages, emails from the client and Monday. Everything that comes close is caught, stretched like spaghetti along its spiral and swallowed. Each one plays a note on a rising pentatonic scale, so the faster you sweep the higher the melody climbs, and the hole grows as it eats.
+3. Clear the screen for a CLEAR! and a ripple through space. Under five seconds counts as a speed clear.
+4. After some clears the hole burps and gives one lost thing back: one sock (the other stays), one of your 400 hair ties, the left earbud at 0% battery, or an umbrella that is not yours. It stays for the next wave, and you can swallow it again.
+5. On a computer, click once to turn the sound on; browsers only allow audio after a click or tap.
+
+## Facts
+
+- URL: https://void.integ.life/
+- Price: free
+- Platforms: any modern web browser (desktop and mobile)
+- Languages: English, 简体中文 (Simplified Chinese), Español, Français and 日本語 (Japanese), picked from the browser language (default English)
+- Sound: synthesised live with the Web Audio API; vibration on Android
+- Made by: Integ Life (https://integ.life/), first published 2026-11-24
+
+## FAQ
+
+**Is this what a real black hole looks like?**
+Roughly. The bright ring hugging the dark centre is the photon ring from the first black hole photograph (M87*); the disk is brighter on the side that moves toward you, and the far side of the disk is bent up over the top by gravity, as in the film Interstellar. Swallowed things are stretched along their path before they vanish, which physicists call spaghettification.
+
+**Why does the black hole give a sock back?**
+Because everyone has lost exactly one sock. After a clear the hole sometimes returns one lost thing with a short note, and keeps the rest.
+
+**Is Void Harvest free?**
+Yes. It is free, with no sign-up, no download and no ads. It runs in any modern browser on phones, tablets and computers.
+
+**Does it have sound and vibration?**
+Yes. Every sound is synthesised live in the browser with the Web Audio API, so there are no audio files to load. On Android phones it also vibrates at the big moments; iPhone browsers do not support web vibration.
+
+**Which languages does it support?**
+English, 简体中文 (Simplified Chinese), Español, Français and 日本語 (Japanese). The language is picked automatically from your browser settings; any other language falls back to English.
+
+**Who made it?**
+Integ Life (integ.life). Void Harvest is one of twelve small stress-relief toys, together with Charge Burst, Glass Smash, Chain Pop, Knock on Wood, Lap Cat, Squishy Bun, Scratch That, Peel Off, Give It a Twirl, Tablecloth Trick, Smooth as Silk. More games are at games.integ.life.
+
+**Is any personal data collected?**
+No account and no personal data. At most, anonymous usage statistics (page views and play counts) are collected.
+
+## Related
+
+- [Charge Burst](https://charge.integ.life/): Hold to annoy a pufferfish until it puffs up and blows its spines off.
+- [Glass Smash](https://smash.integ.life/): Smash a pane of glass with the word you hate written on it.
+- [Chain Pop](https://pop.integ.life/): A sheet of parcel bubble wrap that never runs out. One bubble refuses to pop.
+- [Knock on Wood](https://knock.integ.life/): Tap a wooden fish. Merit +1.
+- [Lap Cat](https://purr.integ.life/): Pet a soft, purring cat on your screen. Mind the belly.
+- [Squishy Bun](https://squish.integ.life/): Squeeze a soft mochi bun. It slowly forgives you.
+- [Scratch That](https://scratch.integ.life/): Scratch the silver off a card. Win a nap.
+- [Peel Off](https://peel.integ.life/): Peel the film off a brand-new phone. Then try to put the film down.
+- [Give It a Twirl](https://twirl.integ.life/): A new skirt on a dress form. Swipe to spin it and watch the hem fly out flat.
+- [Tablecloth Trick](https://yoink.integ.life/): Whip a silk tablecloth out from under Mum's bowls. Fast, or everything goes with it.
+- [Smooth as Silk](https://silk.integ.life/): A silk curtain at an open window. Drag it, let go, watch it fall back.
+- [Integ Games](https://games.integ.life/): more browser games
