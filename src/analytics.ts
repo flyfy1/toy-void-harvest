@@ -21,6 +21,7 @@ const TITLES: Record<ToyId, string> = {
   pour: 'Toy · Perfect Pour',
   stamp: 'Toy · Rubber Stamp',
   zip: 'Toy · Zip It',
+  twirl: 'Toy · Give It a Twirl',
 }
 
 type W = Window & { dataLayer?: unknown[] }
@@ -69,6 +70,7 @@ export type ActKind =
   | 'squeeze' | 'stretch' // squish
   | 'card' // scratch
   | 'peel_start' | 'peel_done' | 'relaid' | 'cling_shake' | 'cling_tap' // peel
+  | 'spin' | 'fabric' // twirl
 
 let eng: ((kind: string) => void) | null = null
 const queued: string[] = []

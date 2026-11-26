@@ -126,7 +126,7 @@ export interface Landing {
   src: Method | 'none'
   /** hop of the link that was opened (0 when unknown) */
   hop: number
-  kind: 'words' | 'name' | 'time' | 'plain'
+  kind: 'words' | 'name' | 'time' | 'score' | 'plain'
 }
 
 /** Read `r` once, before any sync…ToUrl runs, then take it out of the address bar. */
@@ -146,7 +146,7 @@ export const landing: Landing = (() => {
       url.search = q.toString() ? `?${q.toString()}` : ''
       history.replaceState(null, '', url.toString())
     }
-    out.kind = q.has('w') || q.has('g') ? 'words' : q.has('n') || q.has('c') || q.has('s') ? 'name' : q.has('t') ? 'time' : 'plain'
+    out.kind = q.has('w') || q.has('g') ? 'words' : q.has('n') || q.has('c') || q.has('s') ? 'name' : q.has('t') ? 'time' : q.has('k') ? 'score' : 'plain'
     const sent = !!m || location.pathname.startsWith('/g/') || out.kind === 'words' || out.kind === 'name'
     let mine = ''
     try {

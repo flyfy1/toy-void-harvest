@@ -730,6 +730,7 @@ const PEEL = {
     v_micro: '“The bit under the trim stays”',
     small: 'Remove before use. No liability after removal.',
     done: 'Peeled {n} films today. Mum does not know. I left you {obj}:',
+    done1: 'Peeled one film today. Mum does not know. I left you {obj}:',
     invite: 'There is a film waiting to be peeled. Mum is out:',
   },
   'zh-CN': {
@@ -747,6 +748,7 @@ const PEEL = {
     v_micro: '「缝里那一圈，就这样吧」',
     small: '撕前请勿使用。撕后概不负责。',
     done: '今天撕了 {n} 张膜，我妈还不知道。{obj}那张留给你：',
+    done1: '今天撕了 1 张膜，我妈还不知道。{obj}那张留给你：',
     invite: '有张膜等你撕。你妈不在：',
   },
   es: {
@@ -764,6 +766,7 @@ const PEEL = {
     v_micro: '«Lo de debajo del marco se queda»',
     small: 'Retirar antes de usar. Sin responsabilidad después.',
     done: 'Hoy he quitado {n} plásticos. Mamá no lo sabe. Te dejo {obj}:',
+    done1: 'Hoy he quitado un plástico. Mamá no lo sabe. Te dejo {obj}:',
     invite: 'Hay una lámina esperando a que la despegues. Mamá ha salido:',
   },
   fr: {
@@ -781,6 +784,7 @@ const PEEL = {
     v_micro: '« Le bout sous la baguette reste »',
     small: 'À retirer avant usage. Aucune responsabilité après.',
     done: '{n} films retirés aujourd’hui. Maman ne sait rien. Je vous laisse {obj} :',
+    done1: 'Un film retiré aujourd’hui. Maman ne sait rien. Je vous laisse {obj} :',
     invite: 'Un film attend d’être retiré. Maman est sortie :',
   },
   ja: {
@@ -798,6 +802,7 @@ const PEEL = {
     v_micro: '「ふちの下はそのまま」',
     small: '使用前にはがしてください。はがした後は責任を負いません。',
     done: '今日は {n} 枚はがした。母はまだ知らない。{obj}のぶんは残しておいた：',
+    done1: '今日は 1 枚はがした。母はまだ知らない。{obj}のぶんは残しておいた：',
     invite: 'はがされ待ちのフィルムがあります。母は留守です：',
   },
 } satisfies Record<Locale, Record<string, string | string[]>>
@@ -1056,7 +1061,7 @@ export function shareText(toy: ToyId): string {
     }
     case 'peel': {
       const T = PEEL[locale]
-      return store.done && n ? fill(T.done, { n, obj: tx(`peel_name_${peelLeft()}`) }) : T.invite
+      return store.done && n ? fill(n === 1 ? T.done1 : T.done, { n, obj: tx(`peel_name_${peelLeft()}`) }) : T.invite
     }
     case 'twirl': {
       const T = TWIRL[locale]

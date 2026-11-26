@@ -17,7 +17,7 @@ export type Locale = (typeof LOCALES)[number]['code']
 /** The live toys: listed in the More menu, their names are shared text. */
 export type LiveId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch' | 'peel'
 /** Every toy id. A toy not yet live keeps its name in its own strings.ts until launch (then: LiveId, core name). */
-export type ToyId = LiveId | 'crunch' | 'pour' | 'stamp' | 'zip'
+export type ToyId = LiveId | 'crunch' | 'pour' | 'stamp' | 'zip' | 'twirl'
 
 const en = {
   name_charge: "Charge Burst",
