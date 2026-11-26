@@ -833,7 +833,7 @@ export function yoinkRival(): { set: number; k: number } | null {
 /** peel's objects, in the order the game numbers them (peak data `it` and `left`, the link's ?obj=). */
 export const PEEL_ITEMS = ['phone', 'steel', 'remote', 'cam', 'watch', 'car', 'micro', 'fridge', 'laptop', 'cabinet'] as const
 /** How many of them are built so far: the kinds row's total. */
-const PEEL_LIVE = 7
+const PEEL_LIVE = 10
 const peelLeft = () => PEEL_ITEMS[store.peak?.data.left ?? 2] ?? 'remote'
 
 /** peel: 撕膜证明 / Certificate of Peeling. */
@@ -851,6 +851,9 @@ const PEEL = {
     v_watch: '“The film always said 10:09”',
     v_car: '“The dealer said it was factory-fitted”',
     v_micro: '“The bit under the trim stays”',
+    v_fridge: '“So that is the colour I bought”',
+    v_laptop: '“Kept the film. Return window.”',
+    v_cabinet: '“Three years on. Brittle.”',
     small: 'Remove before use. No liability after removal.',
     done: 'Peeled {n} films today. Mum does not know. I left you {obj}:',
     done1: 'Peeled one film today. Mum does not know. I left you {obj}:',
@@ -869,6 +872,9 @@ const PEEL = {
     v_watch: '「膜上的时间一直是 10:09」',
     v_car: '「4S 店说是原厂的」',
     v_micro: '「缝里那一圈，就这样吧」',
+    v_fridge: '「原来冰箱是这个颜色」',
+    v_laptop: '「膜没扔，七天无理由」',
+    v_cabinet: '「贴了三年，脆了」',
     small: '撕前请勿使用。撕后概不负责。',
     done: '今天撕了 {n} 张膜，我妈还不知道。{obj}那张留给你：',
     done1: '今天撕了 1 张膜，我妈还不知道。{obj}那张留给你：',
@@ -887,6 +893,9 @@ const PEEL = {
     v_watch: '«El plástico siempre marcó las 10:09»',
     v_car: '«En el concesionario dijeron que venía de fábrica»',
     v_micro: '«Lo de debajo del marco se queda»',
+    v_fridge: '«Así que ese era el color»',
+    v_laptop: '«El plástico, guardado. Por si lo devuelvo.»',
+    v_cabinet: '«Tres años puesto. Quebradizo.»',
     small: 'Retirar antes de usar. Sin responsabilidad después.',
     done: 'Hoy he quitado {n} plásticos. Mamá no lo sabe. Te dejo {obj}:',
     done1: 'Hoy he quitado un plástico. Mamá no lo sabe. Te dejo {obj}:',
@@ -905,6 +914,9 @@ const PEEL = {
     v_watch: '« Le film a toujours indiqué 10 h 09 »',
     v_car: '« Le concessionnaire a dit que c’était d’origine »',
     v_micro: '« Le bout sous la baguette reste »',
+    v_fridge: '« C’était donc cette couleur-là »',
+    v_laptop: '« Film conservé. On ne sait jamais. »',
+    v_cabinet: '« Trois ans. Cassant. »',
     small: 'À retirer avant usage. Aucune responsabilité après.',
     done: '{n} films retirés aujourd’hui. Maman ne sait rien. Je vous laisse {obj} :',
     done1: 'Un film retiré aujourd’hui. Maman ne sait rien. Je vous laisse {obj} :',
@@ -923,6 +935,9 @@ const PEEL = {
     v_watch: '「フィルムはずっと 10:09」',
     v_car: '「ディーラーは純正だと言った」',
     v_micro: '「ふちの下はそのまま」',
+    v_fridge: '「こんな色だったのか」',
+    v_laptop: '「フィルムは保管。返品に備えて」',
+    v_cabinet: '「3年もの。もろい」',
     small: '使用前にはがしてください。はがした後は責任を負いません。',
     done: '今日は {n} 枚はがした。母はまだ知らない。{obj}のぶんは残しておいた：',
     done1: '今日は 1 枚はがした。母はまだ知らない。{obj}のぶんは残しておいた：',
