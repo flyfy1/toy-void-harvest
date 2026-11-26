@@ -7,21 +7,23 @@ import type { ToyId } from './i18n'
 
 export const MEASUREMENT_ID = 'G-FZ76Z2ZFKD' // Integ Games property; empty string turns analytics off
 
+/** GA page titles, after "Toy · " */
 const TITLES: Record<ToyId, string> = {
-  charge: 'Toy · Charge Burst',
-  void: 'Toy · Void Harvest',
-  smash: 'Toy · Glass Smash',
-  pop: 'Toy · Chain Pop',
-  knock: 'Toy · Knock on Wood',
-  purr: 'Toy · Lap Cat',
-  scratch: 'Toy · Scratch That',
-  squish: 'Toy · Squishy Bun',
-  peel: 'Toy · Peel Off',
-  crunch: 'Toy · Crispy Squish',
-  pour: 'Toy · Perfect Pour',
-  stamp: 'Toy · Rubber Stamp',
-  zip: 'Toy · Zip It',
-  twirl: 'Toy · Give It a Twirl',
+  charge: 'Charge Burst',
+  void: 'Void Harvest',
+  smash: 'Glass Smash',
+  pop: 'Chain Pop',
+  knock: 'Knock on Wood',
+  purr: 'Lap Cat',
+  scratch: 'Scratch That',
+  squish: 'Squishy Bun',
+  peel: 'Peel Off',
+  crunch: 'Crispy Squish',
+  pour: 'Perfect Pour',
+  stamp: 'Rubber Stamp',
+  zip: 'Zip It',
+  twirl: 'Give It a Twirl',
+  yoink: 'Tablecloth Trick',
 }
 
 type W = Window & { dataLayer?: unknown[] }
@@ -40,7 +42,7 @@ export function startAnalytics(toy: ToyId) {
   gtag('consent', 'default', { ad_storage: 'denied', ad_user_data: 'denied', ad_personalization: 'denied', analytics_storage: 'granted' })
   gtag('js', new Date())
   gtag('set', { allow_google_signals: false, allow_ad_personalization_signals: false })
-  const page = { page_location: `https://${host}/`, page_referrer: '', page_title: TITLES[toy] }
+  const page = { page_location: `https://${host}/`, page_referrer: '', page_title: `Toy · ${TITLES[toy]}` }
   gtag('config', MEASUREMENT_ID, { send_page_view: false, ...page })
   gtag('event', 'page_view', { send_to: MEASUREMENT_ID, ...page })
   const s = document.createElement('script')
@@ -71,6 +73,7 @@ export type ActKind =
   | 'card' // scratch
   | 'peel_start' | 'peel_done' | 'relaid' | 'cling_shake' | 'cling_tap' // peel
   | 'spin' | 'fabric' // twirl
+  | 'pull' | 'clean' | 'break' | 'table' // yoink
 
 let eng: ((kind: string) => void) | null = null
 const queued: string[] = []

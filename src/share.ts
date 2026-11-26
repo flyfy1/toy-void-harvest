@@ -146,7 +146,7 @@ export const landing: Landing = (() => {
       url.search = q.toString() ? `?${q.toString()}` : ''
       history.replaceState(null, '', url.toString())
     }
-    out.kind = q.has('w') || q.has('g') ? 'words' : q.has('n') || q.has('c') || q.has('s') ? 'name' : q.has('t') ? 'time' : q.has('k') ? 'score' : 'plain'
+    out.kind = q.has('w') || q.has('g') ? 'words' : q.has('n') || q.has('c') || q.has('s') ? 'name' : q.has('t') ? 'time' : q.has('k') || q.has('b') ? 'score' : 'plain'
     const sent = !!m || location.pathname.startsWith('/g/') || out.kind === 'words' || out.kind === 'name'
     let mine = ''
     try {

@@ -706,6 +706,129 @@ const VOID = {
 /** void's clutter groups and returns, in the order the game numbers them for the card */
 export const VOID_ATE = ['sock', 'receipt', 'keys', 'charger', 'bubble', 'email', 'monday'] as const
 export const VOID_BACK = ['sock', 'tie', 'bud', 'umbrella'] as const
+/** yoink (tablecloth): the props that can break, in the order the card numbers them (`top` = 1 + index) */
+export const YOINK_ITEMS = ['cup', 'bowls', 'fish', 'vase', 'thermos', 'heirloom'] as const
+
+/** yoink (tablecloth): 家庭财产损失清单 / Household Damage Report. */
+const YOINK = {
+  en: {
+    title: 'Household Damage Report',
+    cloth: ['Tablecloth', 'removed in {s} s'],
+    surv: ['Survivors', '{a} of {m}'],
+    loss: 'Losses',
+    none: 'none',
+    more: '{item} and {j} more',
+    rival: ['Their table', '{r} broken'],
+    small: 'Not valid as an explanation to Mum.',
+    cup: 'a tea cup', bowls: 'Mum’s bowl', fish: 'the fish', vase: 'a vase', thermos: 'Grandma’s thermos', heirloom: 'the family heirloom',
+    v_heirloom: '“Handed down five generations. Until today.”',
+    v_bowls: '“That was a set”',
+    v_fish: '“Five-second rule”',
+    v_thermos: '“The outside looks fine”',
+    v_k: '“They say it is good luck”',
+    v_cat: '“The cat did it. It does not count.”',
+    v_0: '“Nothing broke. Mum still says no.”',
+    done0: 'I pulled the cloth off a table of {m}. Nothing broke. Your turn:',
+    donek: 'I pulled the cloth off a table of {m} and broke {k}. See if you can do better:',
+    invite: 'There is a tablecloth here with Mum’s bowls on it. Pull it:',
+    back: 'Send your table back',
+  },
+  'zh-CN': {
+    title: '家庭财产损失清单',
+    cloth: ['桌布', '已抽走，用时 {s} 秒'],
+    surv: ['幸存', '{a} / {m} 件'],
+    loss: '损失',
+    none: '无',
+    more: '{item} 等 {k} 件',
+    rival: ['对手', '碎了 {r} 件'],
+    small: '本清单不可用于向我妈解释。',
+    cup: '茶杯', bowls: '我妈的碗', fish: '那条鱼', vase: '花瓶', thermos: '奶奶的暖水瓶', heirloom: '传家宝',
+    v_heirloom: '「传了五代，传到今天为止」',
+    v_bowls: '「那是成套的」',
+    v_fish: '「今年没有余」',
+    v_thermos: '「胆碎了，壳是好的」',
+    v_k: '「碎碎平安」',
+    v_cat: '「猫推的，不算我的」',
+    v_0: '「一件没碎。我妈还是不同意。」',
+    done0: '我抽了一桌 {m} 件的桌布，一件没碎。你来：',
+    donek: '我抽了一桌 {m} 件的桌布，碎了 {k} 件。你能少碎点吗：',
+    invite: '这儿有张桌布，上面是我妈的碗。你来抽：',
+    back: '把战报甩回去',
+  },
+  es: {
+    title: 'Parte de daños domésticos',
+    cloth: ['Mantel', 'retirado en {s} s'],
+    surv: ['Supervivientes', '{a} de {m}'],
+    loss: 'Bajas',
+    none: 'ninguna',
+    more: '{item} y {j} más',
+    rival: ['Su mesa', '{r} rotos'],
+    small: 'No válido como explicación ante mamá.',
+    cup: 'una taza de té', bowls: 'el cuenco de mamá', fish: 'el pescado', vase: 'un jarrón', thermos: 'el termo de la abuela', heirloom: 'la reliquia de la familia',
+    v_heirloom: '«Cinco generaciones. Hasta hoy.»',
+    v_bowls: '«Era un juego completo»',
+    v_fish: '«Regla de los cinco segundos»',
+    v_thermos: '«Por fuera, como nuevo»',
+    v_k: '«Dicen que trae suerte»',
+    v_cat: '«Ha sido el gato. No cuenta.»',
+    v_0: '«No se ha roto nada. Mamá sigue diciendo que no.»',
+    done0: 'He quitado el mantel de una mesa con {m} cosas. No se ha roto nada. Te toca:',
+    donek: 'He quitado el mantel de una mesa con {m} cosas y he roto {k}. A ver si lo mejoras:',
+    invite: 'Aquí hay un mantel con los cuencos de mamá encima. Tira:',
+    back: 'Devuélvele tu mesa',
+  },
+  fr: {
+    title: 'Constat de dégâts domestiques',
+    cloth: ['Nappe', 'retirée en {s} s'],
+    surv: ['Rescapés', '{a} sur {m}'],
+    loss: 'Pertes',
+    none: 'aucune',
+    more: '{item} et {j} de plus',
+    rival: ['Sa table', '{r} de cassés'],
+    small: 'Non valable comme explication auprès de maman.',
+    cup: 'une tasse à thé', bowls: 'le bol de maman', fish: 'le poisson', vase: 'un vase', thermos: 'le thermos de mamie', heirloom: 'le vase de famille',
+    v_heirloom: '« Cinq générations. Jusqu’à aujourd’hui. »',
+    v_bowls: '« C’était un service complet »',
+    v_fish: '« Règle des cinq secondes »',
+    v_thermos: '« L’extérieur est intact »',
+    v_k: '« Il paraît que ça porte bonheur »',
+    v_cat: '« C’est le chat. Ça ne compte pas. »',
+    v_0: '« Rien de cassé. Maman dit toujours non. »',
+    done0: 'J’ai retiré la nappe d’une table de {m} pièces. Rien de cassé. À vous :',
+    donek: 'J’ai retiré la nappe d’une table de {m} pièces et j’en ai cassé {k}. Faites mieux :',
+    invite: 'Il y a une nappe ici, avec les bols de maman dessus. Tirez :',
+    back: 'Renvoyez votre table',
+  },
+  ja: {
+    title: '家財損害報告書',
+    cloth: ['テーブルクロス', '{s} 秒で引き抜き'],
+    surv: ['無事', '{m} 個中 {a} 個'],
+    loss: '損害',
+    none: 'なし',
+    more: '{item} ほか {j} 個',
+    rival: ['相手', '{r} 個割った'],
+    small: '本書は母への説明には使えません。',
+    cup: '湯のみ', bowls: '母の茶碗', fish: '魚', vase: '花瓶', thermos: '祖母の魔法瓶', heirloom: '家宝',
+    v_heirloom: '「五代続いた。今日まで」',
+    v_bowls: '「揃いだったのに」',
+    v_fish: '「3秒ルール」',
+    v_thermos: '「外側は無事」',
+    v_k: '「厄落としです」',
+    v_cat: '「猫がやった。数に入れない」',
+    v_0: '「何も割れていない。母はそれでも反対」',
+    done0: '{m} 個のせたテーブルからクロスを引き抜いた。ひとつも割れなかった。次はあなた：',
+    donek: '{m} 個のせたテーブルからクロスを引き抜いて、{k} 個割った。もっとうまくできる？：',
+    invite: 'ここにテーブルクロスがある。上には母の茶碗。引いてみて：',
+    back: '結果を送り返す',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+
+/** yoink: a challenge link's table and the sender's breakage (?b=<set><k>), when this visit is a recipient's */
+export function yoinkRival(): { set: number; k: number } | null {
+  if (!landing.recipient) return null
+  const m = /^([1-6])([0-9])$/.exec(new URLSearchParams(location.search).get('b') || '')
+  return m ? { set: Number(m[1]), k: Number(m[2]) } : null
+}
 
 /** peel's objects, in the order the game numbers them (peak data `it` and `left`, the link's ?obj=). */
 export const PEEL_ITEMS = ['phone', 'steel', 'remote', 'cam', 'watch', 'car', 'micro', 'fridge', 'laptop', 'cabinet'] as const
@@ -958,6 +1081,7 @@ const LOOKS: Partial<Record<ToyId, Look>> = {
   squish: { surface: ['#FBE1E6', '#F1CDD4'], grain: 'rgba(160,90,100,0.06)', paper: '#FFFBF3', ink: '#5A3B2A', faint: 'rgba(90,59,42,0.5)', accent: '#6B4A2E', accent2: 'rgba(107,74,46,0.3)' },
   scratch: { surface: ['#1d4a38', '#0f2a20'], grain: 'rgba(255,255,255,0.03)', paper: '#FFF8E7', ink: '#2A2418', faint: 'rgba(42,36,24,0.5)', accent: '#8A6A12', accent2: 'rgba(138,106,18,0.4)' },
   twirl: { surface: ['#EFE6DA', '#E2D5C3'], grain: 'rgba(110,80,50,0.05)', paper: '#FFFDF9', ink: '#3A2F2A', faint: 'rgba(58,47,42,0.5)', accent: '#D9728A', accent2: 'rgba(217,114,138,0.35)' },
+  yoink: { surface: ['#E9DCC8', '#D9C6AA'], grain: 'rgba(90,60,30,0.05)', paper: '#FFFDF7', ink: '#3A1E14', faint: 'rgba(58,30,20,0.5)', accent: '#B3261E', accent2: 'rgba(179,38,30,0.35)' },
   peel: { surface: ['#ECE7DF', '#DCD5CA'], grain: 'rgba(80,70,60,0.05)', paper: '#FFFFFF', ink: '#26302A', faint: 'rgba(38,48,42,0.5)', accent: '#2E7D32', accent2: 'rgba(46,125,50,0.35)' },
 }
 const look = (toy: ToyId) => LOOKS[toy] ?? LOOKS.purr!
@@ -986,6 +1110,8 @@ export function shareUrl(toy: ToyId, method?: Method): string {
   else if (toy === 'peel') q = `?obj=${peelLeft()}`
   // twirl carries the sender's turns as a challenge, and the skirt
   else if (toy === 'twirl' && store.done && (store.peak?.data.t ?? 0) >= 5) q = `?k=${Math.min(999, store.peak!.data.t)}&f=${store.peak!.data.f ?? 0}`
+  // yoink: the table and the sender's breakage, two digits
+  else if (toy === 'yoink' && store.done && store.peak?.data.set) q = `?b=${store.peak.data.set}${Math.min(9, store.peak.data.k ?? 0)}`
   const base = `https://${toy}.integ.life/${q && GIFT_PAGE.includes(toy) ? 'g/' : ''}`
   if (method) q += `${q ? '&' : '?'}r=${method}${hopOut()}`
   return base + q
@@ -1068,6 +1194,12 @@ export function shareText(toy: ToyId): string {
       const p = store.peak?.data
       return store.done && p?.t ? fill(T.done, { t: p.t }) : T.invite
     }
+    case 'yoink': {
+      const T = YOINK[locale]
+      const p = store.peak?.data
+      if (!store.done || !p?.m) return T.invite
+      return fill(p.k ? T.donek : T.done0, { m: p.m, k: p.k })
+    }
     case 'pour':
       return !n ? tx('share_pour') : stats.last === 'golden' ? tx('share_pour_golden', { n }) : tx('share_pour_stat', { n, k })
     default:
@@ -1081,6 +1213,7 @@ export function primaryLabel(toy: ToyId) {
   if (toy === 'scratch' && store.peak?.data.gift) return SCRATCH[locale].primary
   if ((toy === 'pop' || toy === 'void') && store.done && store.peak?.data.s) return TIME_BACK[locale]
   if (toy === 'twirl' && store.done && (store.peak?.data.t ?? 0) >= 5) return TWIRL[locale].back
+  if (toy === 'yoink' && store.done && yoinkRival()) return YOINK[locale].back
   return toy === 'purr' ? PURR[locale].reply : S.reply
 }
 
@@ -1111,6 +1244,8 @@ export const shareExtra = (toy: ToyId): Record<string, number> =>
                 ? { total: stats.n }
                 : toy === 'twirl' && store.peak
                   ? { turns: store.peak.data.t ?? 0, peak: store.peak.data.p ?? 0, f: store.peak.data.f ?? 0 }
+                : toy === 'yoink'
+                  ? { pulls: stats.n ?? 0, perfects: stats.k ?? 0, set: store.peak?.data.set ?? 0 }
                 : toy === 'purr' && store.peak
                   ? { traps: store.peak.data.traps ?? 0, rating_x10: store.peak.data.rating_x10 ?? 0 }
                   : {}
@@ -1259,6 +1394,20 @@ function peelDoc(p: Record<string, number> | null): Doc {
   return { look: look('peel'), title: T.title, rows, focus: 0.5, verdict, small: T.small, call: S.call, host: 'peel.integ.life' }
 }
 
+function yoinkDoc(p: Record<string, number> | null): Doc {
+  const T = YOINK[locale]
+  const rows: [string, string][] = []
+  if (p?.ms) rows.push([T.cloth[0], fill(T.cloth[1], { s: (p.ms / 1000).toFixed(2) })])
+  if (p?.m) rows.push([T.surv[0], fill(T.surv[1], { a: p.a ?? 0, m: p.m })])
+  const k = p?.k ?? 0
+  const top = p?.top ? YOINK_ITEMS[p.top - 1] : undefined
+  if (p) rows.push([T.loss, !k || !top ? T.none : k === 1 ? T[top] : fill(T.more, { item: T[top], j: k - 1, k })])
+  const rv = yoinkRival()
+  if (rv && store.done) rows.push([T.rival[0], fill(T.rival[1], { r: rv.k })])
+  const verdict = top === 'heirloom' ? T.v_heirloom : top === 'bowls' ? T.v_bowls : top === 'fish' ? T.v_fish : top === 'thermos' ? T.v_thermos : k > 0 ? T.v_k : p?.cat ? T.v_cat : T.v_0
+  return { look: look('yoink'), title: T.title, rows: rows.slice(0, 4), focus: 0.45, verdict, small: T.small, call: S.call, host: 'yoink.integ.life' }
+}
+
 const quotes = () => (locale === 'zh-CN' || locale === 'ja' ? ['「', '」'] : locale === 'fr' ? ['« ', ' »'] : locale === 'es' ? ['«', '»'] : ['“', '”'])
 
 /** Every toy without its own document yet: its name and its current share line. */
@@ -1278,5 +1427,6 @@ export function buildDoc(toy: ToyId, peak: Peak | null): Doc {
   if (toy === 'void') return voidDoc(p)
   if (toy === 'peel') return peelDoc(p)
   if (toy === 'twirl') return twirlDoc(p)
+  if (toy === 'yoink') return yoinkDoc(p)
   return (toy === 'scratch' && scratchDoc(p)) || defaultDoc(toy)
 }

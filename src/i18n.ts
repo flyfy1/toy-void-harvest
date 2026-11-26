@@ -5,17 +5,11 @@
 // Arcade shouts (CRITICAL!, CLEAR!, CHAIN, OVERDRIVE) stay English on purpose.
 import TOY from './strings'
 
-export const LOCALES = [
-  { code: 'en', label: 'English' },
-  { code: 'zh-CN', label: '简体中文' },
-  { code: 'es', label: 'Español' },
-  { code: 'fr', label: 'Français' },
-  { code: 'ja', label: '日本語' },
-] as const
+export const LOCALES = ['en', 'zh-CN', 'es', 'fr', 'ja'] as const
 
-export type Locale = (typeof LOCALES)[number]['code']
+export type Locale = (typeof LOCALES)[number]
 /** The live toys: listed in the More menu, their names are shared text. */
-export type LiveId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch' | 'peel' | 'twirl'
+export type LiveId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch' | 'peel' | 'twirl' | 'yoink'
 /** Every toy id. A toy not yet live keeps its name in its own strings.ts until launch (then: LiveId, core name). */
 export type ToyId = LiveId | 'crunch' | 'pour' | 'stamp' | 'zip'
 
@@ -30,6 +24,7 @@ const en = {
   name_scratch: "Scratch That",
   name_peel: "Peel Off",
   name_twirl: "Give It a Twirl",
+  name_yoink: "Tablecloth Trick",
   share: "Share",
   more: "More",
   about: "How to play",
@@ -46,6 +41,7 @@ const zhCN: typeof en = {
   name_scratch: "刮一张",
   name_peel: "撕膜",
   name_twirl: "转圈圈",
+  name_yoink: "抽桌布",
   share: "分享",
   more: "更多",
   about: "玩法说明",
@@ -62,6 +58,7 @@ const es: typeof en = {
   name_scratch: "Rasca y Verás",
   name_peel: "Quita el Plástico",
   name_twirl: "Falda con Vuelo",
+  name_yoink: "El Truco del Mantel",
   share: "Compartir",
   more: "Más",
   about: "Cómo jugar",
@@ -78,6 +75,7 @@ const fr: typeof en = {
   name_scratch: "Grattez Voir",
   name_peel: "Pelez-Moi Ça",
   name_twirl: "La Jupe qui Tourne",
+  name_yoink: "Le Coup de la Nappe",
   share: "Partager",
   more: "Plus",
   about: "Comment jouer",
@@ -94,6 +92,7 @@ const ja: typeof en = {
   name_scratch: "けずってスクラッチ",
   name_peel: "ペリペリ保護フィルム",
   name_twirl: "くるくるスカート",
+  name_yoink: "テーブルクロス引き",
   share: "シェア",
   more: "もっと",
   about: "遊び方",
@@ -108,8 +107,7 @@ function match(raw: string | null | undefined): Locale | null {
   if (!raw) return null
   const v = raw.toLowerCase()
   if (v.startsWith('zh')) return 'zh-CN'
-  const hit = LOCALES.find((l) => l.code.toLowerCase() === v || v.startsWith(l.code.toLowerCase() + '-'))
-  return hit ? hit.code : null
+  return LOCALES.find((l) => l.toLowerCase() === v || v.startsWith(l.toLowerCase() + '-')) ?? null
 }
 
 function detect(): Locale {
