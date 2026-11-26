@@ -24,6 +24,7 @@ const TITLES: Record<ToyId, string> = {
   zip: 'Zip It',
   twirl: 'Give It a Twirl',
   yoink: 'Tablecloth Trick',
+  silk: 'Smooth as Silk',
 }
 
 type W = Window & { dataLayer?: unknown[] }
@@ -74,6 +75,7 @@ export type ActKind =
   | 'peel_start' | 'peel_done' | 'relaid' | 'cling_shake' | 'cling_tap' // peel
   | 'spin' | 'fabric' // twirl
   | 'pull' | 'clean' | 'break' | 'table' // yoink
+  | 'open' | 'cat' | 'puff' // silk (and 'drag', as void)
 
 let eng: ((kind: string) => void) | null = null
 const queued: string[] = []

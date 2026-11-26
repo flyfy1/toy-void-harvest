@@ -1031,6 +1031,72 @@ const TWIRL = {
 /** twirl's skirts, in the order the link's `f` numbers them */
 export const TWIRL_FABRICS = ['chiffon', 'denim', 'mamian', 'tulle'] as const
 
+/** silk: 请假条 / Leave Request. The reason is a curtain; the approver is the breeze. */
+const SILK = {
+  en: {
+    title: 'Leave Request',
+    reason: ['Reason', 'watching a curtain'],
+    dur: ['Duration', '{m} min {s} s'],
+    outside: 'Outside',
+    approved: ['Approved by', 'the breeze'],
+    small: 'Takes effect when the curtain closes.',
+    views: ['', 'a cat', 'the neighbour', 'rain', 'a sunset', 'the moon'],
+    verdicts: ['“Approved. — The breeze”', '“There was a cat behind the curtain the whole time”', '“0.8 seconds of eye contact with the neighbour”', '“The washing is still out”', '“Good sunset. Bad photo.”', '“The moon was up too”'],
+    done: 'I took {m} minutes off to watch a curtain. I left a window for you:',
+    invite: 'There is a window here with a silk curtain. Give it a pull:',
+  },
+  'zh-CN': {
+    title: '请假条',
+    reason: ['事由', '看窗帘飘'],
+    dur: ['时长', '{m} 分 {s} 秒'],
+    outside: '窗外',
+    approved: ['审批', '风'],
+    small: '本假条自拉上窗帘起生效。',
+    views: ['', '一只猫', '对面邻居', '雨', '晚霞', '月亮'],
+    verdicts: ['「同意。——风」', '「窗帘后面一直有猫」', '「和对面对视了 0.8 秒」', '「衣服还在外面」', '「晚霞很好，手机拍不出来」', '「月亮也没睡」'],
+    done: '我请了 {m} 分钟假，在看窗帘。给你也留了一扇窗：',
+    invite: '这儿有一扇窗，窗帘是真丝的。拉一下：',
+  },
+  es: {
+    title: 'Solicitud de permiso',
+    reason: ['Motivo', 'mirar una cortina'],
+    dur: ['Duración', '{m} min {s} s'],
+    outside: 'Fuera',
+    approved: ['Aprobado por', 'la brisa'],
+    small: 'Surte efecto al cerrar la cortina.',
+    views: ['', 'un gato', 'el vecino', 'lluvia', 'un atardecer', 'la luna'],
+    verdicts: ['«Concedido. — La brisa»', '«Había un gato detrás de la cortina todo el rato»', '«0,8 segundos de contacto visual con el vecino»', '«La ropa sigue fuera»', '«Buen atardecer. Mala foto.»', '«La luna tampoco dormía»'],
+    done: 'Me he tomado {m} minutos libres para mirar una cortina. Te dejo una ventana:',
+    invite: 'Aquí hay una ventana con una cortina de seda. Tira de ella:',
+  },
+  fr: {
+    title: 'Demande de congé',
+    reason: ['Motif', 'regarder un rideau'],
+    dur: ['Durée', '{m} min {s} s'],
+    outside: 'Dehors',
+    approved: ['Accordé par', 'la brise'],
+    small: 'Prend effet à la fermeture du rideau.',
+    views: ['', 'un chat', 'le voisin', 'la pluie', 'un coucher de soleil', 'la lune'],
+    verdicts: ['« Accordé. — La brise »', '« Il y avait un chat derrière le rideau depuis le début »', '« 0,8 seconde de regard croisé avec le voisin »', '« Le linge est toujours dehors »', '« Beau coucher de soleil. Photo ratée. »', '« La lune ne dormait pas non plus »'],
+    done: "J'ai pris {m} minutes de congé pour regarder un rideau. Je vous laisse une fenêtre :",
+    invite: 'Il y a ici une fenêtre avec un rideau de soie. Tirez-le :',
+  },
+  ja: {
+    title: '休暇届',
+    reason: ['理由', 'カーテンを眺めるため'],
+    dur: ['期間', '{m} 分 {s} 秒'],
+    outside: '窓の外',
+    approved: ['承認', '風'],
+    small: 'カーテンを閉めた時点から有効。',
+    views: ['', '猫', '向かいの人', '雨', '夕焼け', '月'],
+    verdicts: ['「承認します。——風」', '「カーテンの向こうにずっと猫がいた」', '「向かいの人と 0.8 秒、目が合った」', '「洗濯物はまだ外」', '「夕焼けは良かった。写真はだめ」', '「月も起きていた」'],
+    done: 'カーテンを眺めるために {m} 分休んだ。あなたにも窓をひとつ：',
+    invite: 'ここに窓がある。カーテンは絹。引いてみて：',
+  },
+} satisfies Record<Locale, Record<string, string | string[]>>
+/** silk's events, as `view` on the card and `?v=` on the link (0 is none) */
+export const SILK_VIEWS = ['none', 'cat', 'neighbour', 'rain', 'sunset', 'moon'] as const
+
 /** pop and void: a recipient answers with their own time */
 const TIME_BACK: Record<Locale, string> = { en: 'Send your time back', 'zh-CN': '把成绩甩回去', es: 'Devuélvele tu tiempo', fr: 'Renvoyer votre temps', ja: 'タイムを送り返す' }
 
@@ -1082,6 +1148,7 @@ const LOOKS: Partial<Record<ToyId, Look>> = {
   scratch: { surface: ['#1d4a38', '#0f2a20'], grain: 'rgba(255,255,255,0.03)', paper: '#FFF8E7', ink: '#2A2418', faint: 'rgba(42,36,24,0.5)', accent: '#8A6A12', accent2: 'rgba(138,106,18,0.4)' },
   twirl: { surface: ['#EFE6DA', '#E2D5C3'], grain: 'rgba(110,80,50,0.05)', paper: '#FFFDF9', ink: '#3A2F2A', faint: 'rgba(58,47,42,0.5)', accent: '#D9728A', accent2: 'rgba(217,114,138,0.35)' },
   yoink: { surface: ['#E9DCC8', '#D9C6AA'], grain: 'rgba(90,60,30,0.05)', paper: '#FFFDF7', ink: '#3A1E14', faint: 'rgba(58,30,20,0.5)', accent: '#B3261E', accent2: 'rgba(179,38,30,0.35)' },
+  silk: { surface: ['#F3EADB', '#E6D8C2'], grain: 'rgba(120,95,60,0.05)', paper: '#FFFDF8', ink: '#3B3A32', faint: 'rgba(59,58,50,0.5)', accent: '#7A9A6E', accent2: 'rgba(122,154,110,0.35)' },
   peel: { surface: ['#ECE7DF', '#DCD5CA'], grain: 'rgba(80,70,60,0.05)', paper: '#FFFFFF', ink: '#26302A', faint: 'rgba(38,48,42,0.5)', accent: '#2E7D32', accent2: 'rgba(46,125,50,0.35)' },
 }
 const look = (toy: ToyId) => LOOKS[toy] ?? LOOKS.purr!
@@ -1112,6 +1179,8 @@ export function shareUrl(toy: ToyId, method?: Method): string {
   else if (toy === 'twirl' && store.done && (store.peak?.data.t ?? 0) >= 5) q = `?k=${Math.min(999, store.peak!.data.t)}&f=${store.peak!.data.f ?? 0}`
   // yoink: the table and the sender's breakage, two digits
   else if (toy === 'yoink' && store.done && store.peak?.data.set) q = `?b=${store.peak.data.set}${Math.min(9, store.peak.data.k ?? 0)}`
+  // silk: the sender's view, so the recipient's first open plays it
+  else if (toy === 'silk' && store.done && (store.peak?.data.view ?? 0) > 0) q = `?v=${store.peak!.data.view}`
   const base = `https://${toy}.integ.life/${q && GIFT_PAGE.includes(toy) ? 'g/' : ''}`
   if (method) q += `${q ? '&' : '?'}r=${method}${hopOut()}`
   return base + q
@@ -1200,6 +1269,11 @@ export function shareText(toy: ToyId): string {
       if (!store.done || !p?.m) return T.invite
       return fill(p.k ? T.donek : T.done0, { m: p.m, k: p.k })
     }
+    case 'silk': {
+      const T = SILK[locale]
+      const p = store.peak?.data
+      return store.done && p ? fill(T.done, { m: Math.max(1, Math.floor((p.sec ?? 0) / 60)) }) : T.invite
+    }
     case 'pour':
       return !n ? tx('share_pour') : stats.last === 'golden' ? tx('share_pour_golden', { n }) : tx('share_pour_stat', { n, k })
     default:
@@ -1246,6 +1320,8 @@ export const shareExtra = (toy: ToyId): Record<string, number> =>
                   ? { turns: store.peak.data.t ?? 0, peak: store.peak.data.p ?? 0, f: store.peak.data.f ?? 0 }
                 : toy === 'yoink'
                   ? { pulls: stats.n ?? 0, perfects: stats.k ?? 0, set: store.peak?.data.set ?? 0 }
+                : toy === 'silk' && store.peak
+                  ? { sec: store.peak.data.sec ?? 0, opens: store.peak.data.opens ?? 0 }
                 : toy === 'purr' && store.peak
                   ? { traps: store.peak.data.traps ?? 0, rating_x10: store.peak.data.rating_x10 ?? 0 }
                   : {}
@@ -1408,6 +1484,16 @@ function yoinkDoc(p: Record<string, number> | null): Doc {
   return { look: look('yoink'), title: T.title, rows: rows.slice(0, 4), focus: 0.45, verdict, small: T.small, call: S.call, host: 'yoink.integ.life' }
 }
 
+function silkDoc(p: Record<string, number> | null): Doc {
+  const T = SILK[locale]
+  const sec = p?.sec ?? 0
+  const view = p?.view && p.view > 0 && p.view < SILK_VIEWS.length ? p.view : 0
+  const rows: [string, string][] = [[T.reason[0], T.reason[1]], [T.dur[0], fill(T.dur[1], { m: Math.floor(sec / 60), s: sec % 60 })]]
+  if (view) rows.push([T.outside, T.views[view]])
+  rows.push([T.approved[0], T.approved[1]])
+  return { look: look('silk'), title: T.title, rows, focus: 0.5, verdict: T.verdicts[view], small: T.small, call: S.call, host: 'silk.integ.life' }
+}
+
 const quotes = () => (locale === 'zh-CN' || locale === 'ja' ? ['「', '」'] : locale === 'fr' ? ['« ', ' »'] : locale === 'es' ? ['«', '»'] : ['“', '”'])
 
 /** Every toy without its own document yet: its name and its current share line. */
@@ -1428,5 +1514,6 @@ export function buildDoc(toy: ToyId, peak: Peak | null): Doc {
   if (toy === 'peel') return peelDoc(p)
   if (toy === 'twirl') return twirlDoc(p)
   if (toy === 'yoink') return yoinkDoc(p)
+  if (toy === 'silk') return silkDoc(p)
   return (toy === 'scratch' && scratchDoc(p)) || defaultDoc(toy)
 }

@@ -2,6 +2,7 @@
 // The text every toy shares (names for the More menu, Share, About) lives in i18n.ts.
 
 const en = {
+  name_void: "Void Harvest",
   void_tag: "Someone swallowed Monday in {s}s. You?",
   desc_void: "Hundreds of jittery shapes, and your cursor is a black hole. Spiral them in as the notes climb, and clear the screen in five seconds. A tiny stress-relief toy, no sign-up.",
   hint_void: "Move the black hole · eat everything · tap for sound",
@@ -12,6 +13,7 @@ const en = {
 }
 
 const zhCN: typeof en = {
+  name_void: "黑洞收割",
   void_tag: "有人 {s} 秒吞掉了周一。你呢？",
   desc_void: "满屏几百个乱抖的方块，你的光标是黑洞。所过之处螺旋吸入、音阶一路爬升，5 秒清屏。打开即玩的解压小玩具。",
   hint_void: "移动黑洞吸光一切 · 点一下开声音",
@@ -22,6 +24,7 @@ const zhCN: typeof en = {
 }
 
 const es: typeof en = {
+  name_void: "Agujero Negro",
   void_tag: "Alguien se tragó el lunes en {s} s. ¿Y tú?",
   desc_void: "Cientos de figuras temblorosas y tu cursor es un agujero negro. Atrápalas en espiral mientras suben las notas y limpia la pantalla en cinco segundos. Un juguete antiestrés, sin registro.",
   hint_void: "Mueve el agujero negro · trágatelo todo · toca para activar el sonido",
@@ -32,6 +35,7 @@ const es: typeof en = {
 }
 
 const fr: typeof en = {
+  name_void: "Trou Noir",
   void_tag: "Quelqu’un a avalé lundi en {s} s. Et vous ?",
   desc_void: "Des centaines de formes qui tremblent, et ton curseur est un trou noir. Aspire-les en spirale pendant que les notes montent, et vide l'écran en cinq secondes. Un petit jouet anti-stress, sans inscription.",
   hint_void: "Déplace le trou noir · avale tout · touche pour le son",
@@ -42,6 +46,7 @@ const fr: typeof en = {
 }
 
 const ja: typeof en = {
+  name_void: "ブラックホール",
   void_tag: "誰かが {s} 秒で月曜日を吸い込みました。あなたは？",
   desc_void: "画面を埋めつくす何百ものブルブル図形。カーソルはブラックホール。音階を上げながら渦巻きで吸い込み、5 秒で全消し。登録不要のストレス解消おもちゃ。",
   hint_void: "ブラックホールを動かして全部吸い込め · タップで音が出ます",
