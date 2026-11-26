@@ -4,7 +4,7 @@ import { ShareButton } from './ShareButton'
 import { IconClose, IconGrid, IconInfo, TOY_ICONS } from './Icons'
 
 /** The live toys (crunch, pour, stamp and zip join when they launch). */
-const SITES: LiveId[] = ['charge', 'void', 'smash', 'pop', 'knock', 'purr', 'squish', 'scratch', 'peel']
+const SITES: LiveId[] = ['charge', 'void', 'smash', 'pop', 'knock', 'purr', 'squish', 'scratch', 'peel', 'twirl']
 
 /** Light toys (pale backgrounds) get dark-ink pills. */
 export const LIGHT_TOYS: ToyId[] = ['purr', 'pop', 'squish', 'peel', 'crunch', 'twirl']

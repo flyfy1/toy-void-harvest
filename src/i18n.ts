@@ -15,9 +15,9 @@ export const LOCALES = [
 
 export type Locale = (typeof LOCALES)[number]['code']
 /** The live toys: listed in the More menu, their names are shared text. */
-export type LiveId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch' | 'peel'
+export type LiveId = 'charge' | 'void' | 'smash' | 'pop' | 'knock' | 'purr' | 'squish' | 'scratch' | 'peel' | 'twirl'
 /** Every toy id. A toy not yet live keeps its name in its own strings.ts until launch (then: LiveId, core name). */
-export type ToyId = LiveId | 'crunch' | 'pour' | 'stamp' | 'zip' | 'twirl'
+export type ToyId = LiveId | 'crunch' | 'pour' | 'stamp' | 'zip'
 
 const en = {
   name_charge: "Charge Burst",
@@ -29,6 +29,7 @@ const en = {
   name_squish: "Squishy Bun",
   name_scratch: "Scratch That",
   name_peel: "Peel Off",
+  name_twirl: "Give It a Twirl",
   share: "Share",
   more: "More",
   about: "How to play",
@@ -44,6 +45,7 @@ const zhCN: typeof en = {
   name_squish: "捏捏团子",
   name_scratch: "刮一张",
   name_peel: "撕膜",
+  name_twirl: "转圈圈",
   share: "分享",
   more: "更多",
   about: "玩法说明",
@@ -59,6 +61,7 @@ const es: typeof en = {
   name_squish: "Bollito Blandito",
   name_scratch: "Rasca y Verás",
   name_peel: "Quita el Plástico",
+  name_twirl: "Falda con Vuelo",
   share: "Compartir",
   more: "Más",
   about: "Cómo jugar",
@@ -74,6 +77,7 @@ const fr: typeof en = {
   name_squish: "Petit Mochi Tout Mou",
   name_scratch: "Grattez Voir",
   name_peel: "Pelez-Moi Ça",
+  name_twirl: "La Jupe qui Tourne",
   share: "Partager",
   more: "Plus",
   about: "Comment jouer",
@@ -89,6 +93,7 @@ const ja: typeof en = {
   name_squish: "もちもちにぎにぎ",
   name_scratch: "けずってスクラッチ",
   name_peel: "ペリペリ保護フィルム",
+  name_twirl: "くるくるスカート",
   share: "シェア",
   more: "もっと",
   about: "遊び方",
