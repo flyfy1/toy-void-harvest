@@ -39,7 +39,7 @@ Yes. Every sound is synthesised live in the browser with the Web Audio API, so t
 English, 简体中文 (Simplified Chinese), Español, Français and 日本語 (Japanese). The language is picked automatically from your browser settings; any other language falls back to English.
 
 **Who made it?**
-Integ Life (integ.life). Void Harvest is one of ten small stress-relief toys, together with Charge Burst, Glass Smash, Chain Pop, Knock on Wood, Lap Cat, Squishy Bun, Scratch That, Peel Off, Give It a Twirl. More games are at games.integ.life.
+Integ Life (integ.life). Void Harvest is one of eleven small stress-relief toys, together with Charge Burst, Glass Smash, Chain Pop, Knock on Wood, Lap Cat, Squishy Bun, Scratch That, Peel Off, Give It a Twirl, Tablecloth Trick. More games are at games.integ.life.
 
 **Is any personal data collected?**
 No account and no personal data. At most, anonymous usage statistics (page views and play counts) are collected.
@@ -55,4 +55,5 @@ No account and no personal data. At most, anonymous usage statistics (page views
 - [Scratch That](https://scratch.integ.life/): Scratch the silver off a card. Win a nap.
 - [Peel Off](https://peel.integ.life/): Peel the film off a brand-new phone. Then try to put the film down.
 - [Give It a Twirl](https://twirl.integ.life/): A new skirt on a dress form. Swipe to spin it and watch the hem fly out flat.
+- [Tablecloth Trick](https://yoink.integ.life/): Whip a silk tablecloth out from under Mum's bowls. Fast, or everything goes with it.
 - [Integ Games](https://games.integ.life/): more browser games
