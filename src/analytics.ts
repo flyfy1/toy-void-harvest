@@ -46,9 +46,35 @@ export function startAnalytics(toy: ToyId) {
   s.async = true
   s.src = `https://www.googletagmanager.com/gtag/js?id=${MEASUREMENT_ID}`
   document.head.append(s)
+  // engagement counting (engage.ts), a small lazy chunk; act() queues until it is ready
+  import('./engage').then(
+    (m) => (eng = m.startEngage(queued)),
+    () => (queued.length = 0),
+  )
 }
 
 /** Gameplay and share events (first touch, big moments, the share funnel). Numbers and fixed words only, never user text. */
 export function track(event: string, params: Record<string, number | string> = {}) {
   gtag?.('event', event, { send_to: MEASUREMENT_ID, ...params })
+}
+
+/** Engagement action kinds (fixed words). One act() per gesture or unit, never per frame. */
+export type ActKind =
+  | 'knock' | 'auto_knock' // knock
+  | 'stroke' | 'chin' | 'belly' | 'trap' | 'swat' | 'knead' // purr (stroke: also scratch)
+  | 'charge' | 'blew' | 'poke' | 'tap' // charge
+  | 'pop' | 'wring' // pop
+  | 'drag' | 'eat' | 'clear' // void
+  | 'hit' | 'pane' | 'holdout' // smash
+  | 'squeeze' | 'stretch' // squish
+  | 'card' // scratch
+  | 'peel_start' | 'peel_done' | 'relaid' | 'cling_shake' | 'cling_tap' // peel
+
+let eng: ((kind: string) => void) | null = null
+const queued: string[] = []
+
+/** One meaningful action (a gesture or a unit, never a frame); counted locally, sent in batches by engage.ts. */
+export function act(kind: ActKind) {
+  if (eng) eng(kind)
+  else if (gtag && queued.length < 500) queued.push(kind)
 }

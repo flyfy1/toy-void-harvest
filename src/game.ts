@@ -1,5 +1,5 @@
 import { audio, pentaFreq, type Riser } from './engine/AudioEngine'
-import { track } from './analytics'
+import { act, track } from './analytics'
 import { stats } from './share'
 import { HitStop, Shake, clamp, easeOutBack, haptic, runLoop } from './engine/juice'
 import { Renderer } from './gl'
@@ -258,6 +258,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
 
   const press = (x: number, y: number, mouse: boolean) => {
     audio.unlock()
+    act('drag')
     if (!started) {
       started = true
       onFirst()
@@ -297,6 +298,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
 
   const eat = (it: Item) => {
     it.state = 2
+    act('eat')
     alive--
     eatenWave++
     if (!it.ret && GROUP[it.k] !== undefined) ateWave[GROUP[it.k]]++
@@ -327,6 +329,7 @@ export function startGame(canvas: HTMLCanvasElement, overlay: HTMLCanvasElement,
   const clear = () => {
     const t = waveTime
     clears++
+    act('clear')
     stop.trigger(55)
     flashA = 0.3
     flashC = [1, 0.85, 0.7]
